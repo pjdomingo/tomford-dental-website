@@ -1,0 +1,1762 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TomFord Dental | Luxury Dental Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet" />
+    <script src="../tailwind.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#f46709",
+                        secondary: "#162b57",
+                        neutral: "#f2f2f2",
+                        gold: "#c9a96e",
+                        ivory: "#f9f9f9",
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        body: ["DM Sans", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        /* ─── BASE ─────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: "DM Sans", sans-serif; background: #ffffff; color: #162b57; cursor: none; }
+
+        /* ─── CUSTOM CURSOR ────────────────────────────── */
+        #cursor-dot {
+            width: 10px; height: 10px;
+            background: #f46709;
+            border-radius: 50%;
+            position: fixed;
+            top: 0; left: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.08s ease, width 0.2s ease, height 0.2s ease, background 0.2s ease;
+            mix-blend-mode: multiply;
+        }
+        #cursor-ring {
+            width: 36px; height: 36px;
+            border: 1.5px solid rgba(244,103,9,0.45);
+            border-radius: 50%;
+            position: fixed;
+            top: 0; left: 0;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: left 0.12s ease, top 0.12s ease, width 0.22s ease, height 0.22s ease, opacity 0.22s ease;
+        }
+        body:not(.cursor-active) #cursor-dot,
+        body:not(.cursor-active) #cursor-ring { opacity: 0; }
+        body.cursor-hover #cursor-dot { width: 16px; height: 16px; background: #c9a96e; }
+        body.cursor-hover #cursor-ring { width: 52px; height: 52px; opacity: 0.6; }
+
+        /* ─── NAV ──────────────────────────────────────── */
+        #navbar {
+            position: fixed; top: 0; z-index: 50; width: 100%;
+            transition: background 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease, padding 0.3s ease;
+        }
+        #navbar.scrolled {
+            background: rgba(250, 246, 241, 0.96);
+            box-shadow: 0 8px 32px rgba(22,43,87,0.08);
+            backdrop-filter: blur(12px);
+        }
+        #navbar .nav-link { color: #ffffff; transition: color 0.22s ease; }
+        #navbar.scrolled .nav-link { color: #162b57; }
+        #navbar .nav-link:not(.book-now):hover,
+        #navbar .nav-link:not(.book-now):focus { color: #f46709; }
+        #navbar.scrolled .nav-link:not(.book-now):hover,
+        #navbar.scrolled .nav-link:not(.book-now):focus { color: #f46709; }
+        #navbar .nav-link.active,
+        #navbar.scrolled .nav-link.active { color: #f46709; }
+        #navbar .nav-link.book-now,
+        #navbar.scrolled .nav-link.book-now { color: #ffffff; }
+
+        .mobile-drawer {
+            max-height: 0; opacity: 0; overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+        }
+        .mobile-drawer.open { max-height: 500px; opacity: 1; }
+
+        /* ─── MAGNETIC BUTTON ──────────────────────────── */
+        .magnetic-btn { display: inline-block; transition: transform 0.15s ease; }
+
+        /* ─── HERO ─────────────────────────────────────── */
+        .hero-bg {
+            position: absolute; inset: 0;
+            background-image: url("../assets/483760197_122114466236736343_4379721410716235375_n.jpg");
+            background-size: cover;
+            background-position: center;
+            will-change: transform;
+        }
+        .hero-bg::after {
+            content: "";
+            position: absolute; inset: 0;
+            background: linear-gradient(160deg, rgba(8,5,2,0.78) 0%, rgba(20,12,4,0.42) 50%, rgba(244,103,9,0.22) 100%);
+        }
+
+        /* Bokeh / particle dots */
+        .hero-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(244, 103, 9, 0.22);
+            animation: floatParticle linear infinite;
+            filter: blur(1px);
+        }
+
+        @keyframes floatParticle {
+            0%   { transform: translateY(0) scale(1); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 0.6; }
+            100% { transform: translateY(-110vh) scale(0.6); opacity: 0; }
+        }
+
+        /* 3D Geometric shape in hero */
+        .hero-3d-wrap {
+            position: absolute; right: 8%; bottom: 14%;
+            width: 140px; height: 140px;
+            perspective: 600px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        @media (max-width: 768px) { .hero-3d-wrap { right: 4%; bottom: 8%; width: 90px; height: 90px; } }
+        .hero-3d-inner {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateCube 14s linear infinite;
+        }
+        @keyframes rotateCube {
+            0%   { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            100% { transform: rotateX(360deg) rotateY(240deg) rotateZ(120deg); }
+        }
+        .hero-3d-face {
+            position: absolute; inset: 0;
+            border: 1.5px solid rgba(244,103,9,0.5);
+            border-radius: 12px;
+            background: rgba(244,103,9,0.04);
+            backdrop-filter: blur(2px);
+        }
+        .face-front  { transform: translateZ(70px); }
+        .face-back   { transform: rotateY(180deg) translateZ(70px); }
+        .face-left   { transform: rotateY(-90deg) translateZ(70px); }
+        .face-right  { transform: rotateY(90deg) translateZ(70px); }
+        .face-top    { transform: rotateX(90deg) translateZ(70px); }
+        .face-bottom { transform: rotateX(-90deg) translateZ(70px); }
+        @media (max-width: 768px) {
+            .face-front  { transform: translateZ(45px); }
+            .face-back   { transform: rotateY(180deg) translateZ(45px); }
+            .face-left   { transform: rotateY(-90deg) translateZ(45px); }
+            .face-right  { transform: rotateY(90deg) translateZ(45px); }
+            .face-top    { transform: rotateX(90deg) translateZ(45px); }
+            .face-bottom { transform: rotateX(-90deg) translateZ(45px); }
+        }
+
+        /* Hero text reveal */
+        .hero-word-wrap { display: inline-block; overflow: hidden; vertical-align: bottom; }
+        .hero-word {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(110%);
+            animation: wordReveal 0.75s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        @keyframes wordReveal {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hero-fade-up {
+            opacity: 0;
+            transform: translateY(18px);
+            animation: heroBgFade 0.9s ease forwards;
+        }
+        @keyframes heroBgFade {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── SCROLL REVEAL ─────────────────────────────── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.75s cubic-bezier(0.22,1,0.36,1), transform 0.75s cubic-bezier(0.22,1,0.36,1);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        .reveal-left { opacity: 0; transform: translateX(-36px); transition: opacity 0.75s ease, transform 0.75s ease; }
+        .reveal-left.visible { opacity: 1; transform: translateX(0); }
+        .reveal-right { opacity: 0; transform: translateX(36px); transition: opacity 0.75s ease, transform 0.75s ease; }
+        .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+        /* stagger delays */
+        .delay-100 { transition-delay: 0.10s; }
+        .delay-200 { transition-delay: 0.20s; }
+        .delay-300 { transition-delay: 0.30s; }
+        .delay-400 { transition-delay: 0.40s; }
+        .delay-500 { transition-delay: 0.50s; }
+
+        /* ─── SERVICE CARDS (premium, uniform, animated) ── */
+        .service-card {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #ffffff 0%, #fbfaf7 100%);
+            border: 1px solid rgba(22,43,87,0.08);
+            border-radius: 16px;
+            padding: 22px 20px 20px;
+            opacity: 0;
+            transform: translateY(18px);
+            transition:
+                opacity 0.5s ease,
+                transform 0.35s cubic-bezier(0.22,1,0.36,1),
+                box-shadow 0.3s ease,
+                border-color 0.25s ease;
+            will-change: transform;
+        }
+        /* Animated gradient accent bar on the left */
+        .service-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 12px; bottom: 12px;
+            width: 3px;
+            background: linear-gradient(180deg, #f46709 0%, #ffb680 100%);
+            border-radius: 0 3px 3px 0;
+            transform: scaleY(0);
+            transform-origin: center;
+            transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+        }
+        /* Soft warm glow sweep on hover (top-right) */
+        .service-card::after {
+            content: '';
+            position: absolute;
+            top: -60%; right: -40%;
+            width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(244,103,9,0.16) 0%, rgba(244,103,9,0) 70%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+        }
+        .service-card.svc-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .service-card.svc-in:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 42px -14px rgba(22,43,87,0.18), 0 4px 12px rgba(22,43,87,0.05);
+            border-color: rgba(244,103,9,0.25);
+        }
+        .service-card.svc-in:hover::before { transform: scaleY(1); }
+        .service-card.svc-in:hover::after  { opacity: 1; }
+
+        /* Icon badge — circular, gradient, lifts on hover */
+        .svc-icon {
+            width: 42px; height: 42px;
+            background: linear-gradient(135deg, #fff3e8 0%, #ffe0c7 100%);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 14px;
+            flex-shrink: 0;
+            box-shadow: inset 0 0 0 1px rgba(244,103,9,0.14), 0 4px 10px rgba(244,103,9,0.08);
+            transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease;
+        }
+        .service-card:hover .svc-icon {
+            transform: scale(1.08) rotate(-4deg);
+            box-shadow: inset 0 0 0 1px rgba(244,103,9,0.28), 0 8px 18px rgba(244,103,9,0.18);
+        }
+        .svc-icon svg { transition: transform 0.35s ease; }
+        .service-card:hover .svc-icon svg { transform: scale(1.1); }
+
+        /* Title — Playfair Display, elegant */
+        .svc-title {
+            color: #162b57;
+            font-family: "Playfair Display", serif;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 6px;
+            letter-spacing: -0.005em;
+            transition: color 0.25s ease;
+        }
+        .service-card:hover .svc-title { color: #f46709; }
+
+        /* Description — DM Sans, quiet */
+        .svc-desc {
+            color: rgba(22,43,87,0.56);
+            font-size: 12px;
+            line-height: 1.65;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* ─── STATS COUNT-UP ────────────────────────────── */
+        .stat-num {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .stat-num.counted { opacity: 1; }
+
+        /* ─── FORM FOCUS ANIMATED UNDERLINE ─────────────── */
+        .input-wrap { position: relative; }
+        .input-line {
+            position: absolute; bottom: 0; left: 0;
+            height: 2px; width: 0; background: #f46709;
+            border-radius: 1px;
+            transition: width 0.35s cubic-bezier(0.22,1,0.36,1);
+        }
+        .booking-input-v2 {
+            width: 100%;
+            padding: 0.65rem 0;
+            border: none; border-bottom: 1.5px solid rgba(22,43,87,0.18);
+            background: transparent;
+            color: #162b57;
+            font-family: "DM Sans", sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.25s ease;
+        }
+        .booking-input-v2:focus { border-color: #f46709; }
+        .booking-input-v2:focus ~ .input-line { width: 100%; }
+        .booking-input-v2::placeholder { color: rgba(22,43,87,0.35); }
+
+        /* keep select styling consistent */
+        select.booking-input-v2 { cursor: pointer; }
+
+        /* ─── FAQ ───────────────────────────────────────── */
+        .faq-panel { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.25s ease; opacity: 0; }
+        .faq-item.active .faq-panel { opacity: 1; }
+        .faq-icon svg { display: inline-block; vertical-align: middle; transition: transform 0.28s ease; transform-origin: 50% 50%; }
+        .faq-icon .h-line { transition: opacity 0.28s ease, transform 0.28s ease; transform-origin: 50% 50%; }
+        .faq-item.active .faq-icon svg { transform: rotate(90deg); }
+        .faq-item.active .faq-icon .h-line { opacity: 0; transform: scaleX(0.1); }
+
+        /* ─── TESTIMONIALS ──────────────────────────────── */
+        .testimonial-fade { transition: opacity 0.35s ease; }
+
+        /* ─── BOOKING MODAL ─────────────────────────────── */
+        .booking-modal { position: fixed; inset: 0; z-index: 70; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .booking-modal.open { display: flex; }
+        .booking-backdrop { position: absolute; inset: 0; background: rgba(12,26,54,0.7); backdrop-filter: blur(4px); }
+        .booking-panel {
+            position: relative; z-index: 1;
+            width: min(100%, 720px); max-height: calc(100vh - 2rem); overflow: auto;
+            border-radius: 1.25rem;
+            background: #faf6f1;
+            box-shadow: 0 32px 80px rgba(10,18,35,0.28);
+            animation: modalIn 0.35s cubic-bezier(0.22,1,0.36,1);
+        }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: none; } }
+        .no-scroll { overflow: hidden; }
+
+        /* ─── TOAST ─────────────────────────────────────── */
+        #bookingToast {
+            position: fixed; top: 1.5rem; right: 1.5rem; z-index: 80;
+            display: flex; align-items: center; gap: 0.75rem;
+            width: 320px; max-width: calc(100% - 3rem);
+            padding: 0.8rem 1.1rem; border-radius: 0.85rem;
+            background: #faf6f1; color: #162b57;
+            border: 1px solid rgba(22,43,87,0.08);
+            box-shadow: 0 12px 36px rgba(16,24,40,0.1);
+            transform: translateY(-8px); opacity: 0;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            pointer-events: none;
+        }
+        #bookingToast.hidden { display: none; }
+        #bookingToast.toast-show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        #bookingToast.toast-success { border-color: rgba(16,185,129,0.15); background: #f0fdf4; color: #065f46; }
+        #bookingToast.toast-error { border-color: rgba(220,38,38,0.12); background: #fff5f5; color: rgb(220,38,38); }
+
+        /* ─── CTA BUTTON ────────────────────────────────── */
+        .btn-primary {
+            display: inline-block;
+            background: #f46709; color: #fff;
+            border-radius: 9999px;
+            padding: 0.8rem 2rem;
+            font-weight: 600; font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+            box-shadow: 0 4px 18px rgba(244,103,9,0.28);
+        }
+        .btn-primary:hover { background: #d84f03; box-shadow: 0 8px 28px rgba(244,103,9,0.38); }
+        .btn-outline {
+            display: inline-block;
+            border: 1.5px solid rgba(255,255,255,0.65); color: #fff;
+            border-radius: 9999px; padding: 0.8rem 2rem;
+            font-weight: 600; font-size: 0.95rem;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .btn-outline:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.9); }
+
+        /* ─── GOLD DIVIDER ──────────────────────────────── */
+        .gold-line { display: block; width: 48px; height: 2px; background: linear-gradient(90deg,#c9a96e,#f46709); border-radius: 1px; }
+
+        /* ─── FOOTER ────────────────────────────────────── */
+        footer { background: #ffffff; }
+
+        @media (max-width: 420px) {
+            #bookingToast { right: 1rem; left: 1rem; width: auto; max-width: none; }
+        }
+
+        /* ─── SECTION LABEL ─────────────────────────────── */
+        .section-label { display: inline-block; font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase; color: #f46709; font-weight: 500; margin-bottom: 0.75rem; }
+
+        /* ─── SERVICE FILTER TABS ───────────────────────── */
+        .svc-tab {
+            padding: 0.45rem 1.1rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            border: 1.5px solid rgba(22,43,87,0.15);
+            color: rgba(22,43,87,0.6);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .svc-tab:hover { border-color: #f46709; color: #f46709; }
+        .svc-tab.active { background: #f46709; border-color: #f46709; color: #fff; }
+        .svc-item.hidden-item { display: none; }
+
+        /* ─── SLOT PICKER ───────────────────────────────────── */
+        .slot-picker-wrap { width:100%; }
+        .slot-picker-nav {
+            display:flex; align-items:center; justify-content:space-between;
+            margin-bottom:1rem;
+        }
+        .slot-nav-btn {
+            display:flex; align-items:center; justify-content:center;
+            width:34px; height:34px; border-radius:50%;
+            border:1.5px solid rgba(22,43,87,0.18);
+            background:transparent; cursor:pointer;
+            color:#162b57; font-size:1rem;
+            transition:all 0.2s ease;
+        }
+        .slot-nav-btn:hover:not(:disabled) { border-color:#f46709; color:#f46709; }
+        .slot-nav-btn:disabled { opacity:0.3; cursor:not-allowed; }
+        .slot-week-label {
+            font-size:0.78rem; color:rgba(22,43,87,0.5);
+            letter-spacing:0.06em; text-align:center;
+        }
+        .slot-grid {
+            display:grid;
+            grid-template-columns:repeat(5,1fr);
+            gap:8px;
+            overflow-x:auto;
+            padding-bottom:4px;
+        }
+        @media (max-width:520px) { .slot-grid { grid-template-columns:repeat(3,1fr); } }
+        .slot-col { display:flex; flex-direction:column; gap:6px; min-width:0; }
+        .slot-day-hdr {
+            text-align:center; padding:8px 4px 10px;
+            border-bottom:1.5px solid rgba(22,43,87,0.08);
+            margin-bottom:4px;
+        }
+        .slot-day-label {
+            font-size:9px; letter-spacing:0.2em; text-transform:uppercase;
+            color:#f46709; font-weight:600; display:block; margin-bottom:2px;
+        }
+        .slot-day-name {
+            font-size:0.82rem; font-weight:700; color:#162b57;
+            display:block; margin-bottom:1px;
+        }
+        .slot-day-date { font-size:0.72rem; color:rgba(22,43,87,0.45); display:block; }
+        .slot-btn {
+            width:100%; padding:9px 4px;
+            border:1.5px solid rgba(22,43,87,0.14);
+            border-radius:8px; background:#fff;
+            font-size:0.78rem; font-weight:500; color:#162b57;
+            cursor:pointer; text-align:center;
+            transition:all 0.18s ease;
+            font-family:'DM Sans',sans-serif;
+            white-space:nowrap;
+        }
+        .slot-btn:hover { border-color:#f46709; color:#f46709; background:#fff8f0; }
+        .slot-btn.selected {
+            background:#f46709; border-color:#f46709;
+            color:#fff; font-weight:700;
+            box-shadow:0 4px 14px rgba(244,103,9,0.3);
+        }
+        .slot-empty {
+            font-size:0.72rem; color:rgba(22,43,87,0.35);
+            text-align:center; padding:10px 4px; font-style:italic;
+        }
+        .slot-loading {
+            height:48px; border-radius:8px;
+            background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);
+            background-size:200% 100%;
+            animation:shimmer 1.2s infinite;
+        }
+        @keyframes shimmer {
+            0%   { background-position:200% 0; }
+            100% { background-position:-200% 0; }
+        }
+        .slot-selected-display {
+            margin-top:12px; padding:10px 14px;
+            background:#fff8f0; border-radius:8px;
+            border-left:3px solid #f46709;
+            font-size:0.82rem; color:#f46709; font-weight:600;
+            display:none;
+        }
+        .slot-selected-display.visible { display:block; }
+    </style>
+</head>
+
+<body class="bg-neutral text-secondary">
+
+    <!-- CUSTOM CURSOR -->
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- NAV -->
+    <nav id="navbar" class="fixed top-0 z-50 w-full transition-all duration-300">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
+            <a href="#hero" class="flex items-center gap-3">
+                <img src="../assets/logo.png" alt="TomFord Dental" class="h-14 w-auto" />
+                <span class="sr-only">TomFord Dental</span>
+            </a>
+            <div class="hidden items-center gap-9 text-xs tracking-[0.22em] md:flex">
+                <a href="#services" class="nav-link uppercase">Services</a>
+                <a href="#why-us" class="nav-link uppercase">Why Us</a>
+                <a href="#testimonials" class="nav-link uppercase">Experience</a>
+                <a href="#faq" class="nav-link uppercase">FAQ</a>
+                <a href="#location" class="nav-link uppercase">Location</a>
+            </div>
+            <div class="hidden md:block">
+                <a href="#book" class="magnetic-btn nav-link book-now open-booking-modal btn-primary text-sm" data-booking-trigger="true">Book Now</a>
+            </div>
+            <button id="menuBtn" aria-label="Toggle menu" class="md:hidden">
+                <svg id="menuIcon" class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="#162b57" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+                <svg id="closeIcon" class="hidden h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="#162b57" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+            </button>
+        </div>
+        <div id="mobileDrawer" class="mobile-drawer border-t border-secondary/10 bg-ivory px-6 md:hidden">
+            <div class="flex flex-col gap-4 py-5 text-xs tracking-[0.18em]">
+                <a href="#services" class="nav-link uppercase">Services</a>
+                <a href="#why-us" class="nav-link uppercase">Why Us</a>
+                <a href="#testimonials" class="nav-link uppercase">Experience</a>
+                <a href="#faq" class="nav-link uppercase">FAQ</a>
+                <a href="#location" class="nav-link uppercase">Location</a>
+                <a href="#book" class="magnetic-btn nav-link book-now open-booking-modal btn-primary text-center text-sm" data-booking-trigger="true">Book Now</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- ═══════════════ HERO ═══════════════════════════ -->
+        <section id="hero" class="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-28 pb-20 text-center text-white">
+            <!-- Parallax bg -->
+            <div class="hero-bg" id="heroBg"></div>
+
+            <!-- Bokeh particles -->
+            <div class="hero-particles" id="heroParticles"></div>
+
+            <!-- 3D rotating cube -->
+            <div class="hero-3d-wrap">
+                <div class="hero-3d-inner">
+                    <div class="hero-3d-face face-front"></div>
+                    <div class="hero-3d-face face-back"></div>
+                    <div class="hero-3d-face face-left"></div>
+                    <div class="hero-3d-face face-right"></div>
+                    <div class="hero-3d-face face-top"></div>
+                    <div class="hero-3d-face face-bottom"></div>
+                </div>
+            </div>
+
+            <!-- Hero content -->
+            <div class="relative z-10 max-w-4xl">
+                <p class="hero-fade-up mb-5 text-xs tracking-[0.38em] text-white/75 uppercase" style="animation-delay:0.1s">
+                    TomFord Dental
+                </p>
+
+                <h1 class="font-display text-5xl leading-tight sm:text-6xl lg:text-[5.5rem] lg:leading-[1.08]" id="heroHeading" aria-label="TomFord Dental">
+                    <!-- words injected by JS -->
+                </h1>
+
+                <p class="hero-fade-up mx-auto mt-8 max-w-xl text-base text-white/85 sm:text-lg leading-relaxed" style="animation-delay:0.85s">
+                    Compassionate care, modern technology, and a team that treats every visit like it matters — because it does.
+                </p>
+                <div class="hero-fade-up mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row" style="animation-delay:1.05s">
+                    <a href="#book" class="magnetic-btn nav-link open-booking-modal btn-primary" data-booking-trigger="true">Reserve Consultation</a>
+                    <a href="#services" class="magnetic-btn btn-outline">Explore Services</a>
+                </div>
+
+                <!-- Scroll cue -->
+                <div class="hero-fade-up mt-16 flex justify-center" style="animation-delay:1.3s">
+                    <div class="flex flex-col items-center gap-2 opacity-50">
+                        <span class="text-[10px] tracking-[0.3em] uppercase">Scroll</span>
+                        <span class="block h-8 w-px bg-white/60 animate-pulse"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ STATS BANNER ══════════════════ -->
+        <section class="py-14" style="background: linear-gradient(135deg, #f46709 0%, #e05800 100%);">
+            <div class="mx-auto max-w-7xl px-6 lg:px-10">
+                <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+                    <div class="reveal text-center text-white delay-100">
+                        <p class="font-display text-4xl lg:text-5xl stat-num" data-target="98" data-suffix="%">0%</p>
+                        <p class="mt-2 text-xs tracking-[0.2em] text-white/60 uppercase">Clinical Acceptance</p>
+                    </div>
+                    <div class="reveal text-center text-white delay-200">
+                        <p class="font-display text-4xl lg:text-5xl stat-num" data-target="2400" data-suffix="+">0+</p>
+                        <p class="mt-2 text-xs tracking-[0.2em] text-white/60 uppercase">Happy Patients</p>
+                    </div>
+                    <div class="reveal text-center text-white delay-300">
+                        <p class="font-display text-4xl lg:text-5xl stat-num" data-target="12" data-suffix=" yrs">0 yrs</p>
+                        <p class="mt-2 text-xs tracking-[0.2em] text-white/60 uppercase">Years of Excellence</p>
+                    </div>
+                    <div class="reveal text-center text-white delay-400">
+                        <p class="font-display text-4xl lg:text-5xl" style="opacity:1;">24/7</p>
+                        <p class="mt-2 text-xs tracking-[0.2em] text-white/60 uppercase">Priority Access</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ SERVICES ══════════════════════ -->
+<section id="services" class="relative mx-auto max-w-7xl px-6 py-28 lg:px-10">
+    <div class="reveal mb-14 max-w-xl">
+        <span class="section-label">What We Offer</span>
+        <h2 class="font-display text-5xl lg:text-6xl text-secondary leading-tight">Services Offered</h2>
+        <p class="mt-5 text-secondary/70 leading-relaxed">Comprehensive dental care — from preventive checkups to cosmetic and surgical treatments.</p>
+    </div>
+
+    <!-- Category filter tabs -->
+    <div class="reveal mb-10 flex flex-wrap gap-2" id="serviceFilterTabs">
+        <button class="svc-tab active" data-cat="all">All</button>
+        <button class="svc-tab" data-cat="preventive">Preventive</button>
+        <button class="svc-tab" data-cat="restorative">Restorative</button>
+        <button class="svc-tab" data-cat="cosmetic">Cosmetic</button>
+        <button class="svc-tab" data-cat="prosthetics">Prosthetics</button>
+        <button class="svc-tab" data-cat="orthodontics">Orthodontics</button>
+        <button class="svc-tab" data-cat="surgery">Surgery</button>
+    </div>
+
+    <div class="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" id="servicesGrid">
+        <!-- Preventive -->
+        <article class="service-card svc-item" data-cat="preventive">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 8v4l3 3"/></svg></div>
+            <h3 class="svc-title">Consultation</h3>
+            <p class="svc-desc">Initial assessment of your oral health to plan personalized, effective treatment.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="preventive">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg></div>
+            <h3 class="svc-title">TMJ Consultation</h3>
+            <p class="svc-desc">Specialized evaluation and treatment planning for temporomandibular joint disorders.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="preventive">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+            <h3 class="svc-title">Periapical X-ray</h3>
+            <p class="svc-desc">Detailed radiographic imaging to detect root issues, bone loss, and hidden decay.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="preventive">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M12 2C8 2 4 6 4 10c0 4 2 6 4 8l4 4 4-4c2-2 4-4 4-8 0-4-4-8-8-8z"/></svg></div>
+            <h3 class="svc-title">Oral Prophylaxis</h3>
+            <p class="svc-desc">Professional cleaning to remove plaque and tartar and maintain optimal gum health.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="preventive">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M4 4h16v4H4z"/><path d="M4 12h10v4H4z"/><path d="M4 20h6"/></svg></div>
+            <h3 class="svc-title">Deep Scaling</h3>
+            <p class="svc-desc">Thorough sub-gingival cleaning to treat gum disease and prevent further periodontal damage.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="preventive">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 12s1 2 4 2 4-2 4-2"/></svg></div>
+            <h3 class="svc-title">Fluoride Treatment</h3>
+            <p class="svc-desc">Protective fluoride application to strengthen enamel and prevent cavities in all ages.</p>
+        </article>
+        <!-- Restorative -->
+        <article class="service-card svc-item" data-cat="restorative">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="8" width="18" height="8" rx="3"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg></div>
+            <h3 class="svc-title">Tooth Filling</h3>
+            <p class="svc-desc">Durable composite restorations that repair cavities and blend seamlessly with natural teeth.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="restorative">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M4 12s1-8 8-8 8 8 8 8-1 8-8 8-8-8-8-8z"/></svg></div>
+            <h3 class="svc-title">Root Canal Treatment</h3>
+            <p class="svc-desc">Careful removal of infected pulp tissue to save the tooth and relieve severe pain.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="restorative">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+            <h3 class="svc-title">Pit &amp; Fissure Sealant</h3>
+            <p class="svc-desc">Protective coating applied to back teeth to prevent decay in deep grooves and fissures.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="restorative">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/></svg></div>
+            <h3 class="svc-title">Esthetic Restoration</h3>
+            <p class="svc-desc">Natural-looking repairs for chipped, cracked, or discolored teeth using advanced composites.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="restorative">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M9 7h6M9 12h6M9 17h4"/></svg></div>
+            <h3 class="svc-title">Jacket Crown</h3>
+            <p class="svc-desc">Full-coverage porcelain cap that restores strength, shape, and appearance of a damaged tooth.</p>
+        </article>
+        <!-- Cosmetic -->
+        <article class="service-card svc-item" data-cat="cosmetic">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v3M6.3 6.3l2.1 2.1M3 12h3M6.3 17.7l2.1-2.1M12 21v-3M17.7 17.7l-2.1-2.1M21 12h-3M17.7 6.3l-2.1 2.1"/></svg></div>
+            <h3 class="svc-title">Teeth Whitening</h3>
+            <p class="svc-desc">Safe, professional bleaching treatments that lift deep stains and brighten your smile.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="cosmetic">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12s1 2 4 2 4-2 4-2"/></svg></div>
+            <h3 class="svc-title">Veneers</h3>
+            <p class="svc-desc">Ultra-thin porcelain shells bonded to the front of teeth for a flawless, magazine-ready smile.</p>
+        </article>
+        <!-- Prosthetics -->
+        <article class="service-card svc-item" data-cat="prosthetics">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M6 4c0 0-2 2-2 7s2 9 6 9 6-4 6-9-2-7-2-7"/><path d="M10 4h4"/></svg></div>
+            <h3 class="svc-title">Dentures</h3>
+            <p class="svc-desc">Custom-made removable prosthetics that restore your full smile, bite function, and facial structure.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="prosthetics">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h8M6 10h12M8 14h8M10 18h4"/></svg></div>
+            <h3 class="svc-title">Fixed Bridge</h3>
+            <p class="svc-desc">Permanently anchored tooth replacement that bridges the gap left by missing teeth.</p>
+        </article>
+        <!-- Orthodontics -->
+        <article class="service-card svc-item" data-cat="orthodontics">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h3l3-8 4 16 3-8h3"/></svg></div>
+            <h3 class="svc-title">Orthodontic Treatment</h3>
+            <p class="svc-desc">Traditional and modern braces to straighten teeth and correct bite alignment for lasting results.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="orthodontics">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <h3 class="svc-title">Retainers</h3>
+            <p class="svc-desc">Custom retainers to hold your teeth in their corrected position after orthodontic treatment.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="orthodontics">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M4 8h16v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg></div>
+            <h3 class="svc-title">Dental Splint</h3>
+            <p class="svc-desc">A custom oral appliance for stabilizing teeth affected by trauma, bruxism, or TMJ disorders.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="orthodontics">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a9 9 0 1 0 0 18A9 9 0 0 0 12 2z"/><path d="M8 10s1 2 4 2 4-2 4-2"/></svg></div>
+            <h3 class="svc-title">Night Guard</h3>
+            <p class="svc-desc">Protective custom guard worn during sleep to prevent grinding damage and morning jaw pain.</p>
+        </article>
+        <!-- Surgery -->
+        <article class="service-card svc-item" data-cat="surgery">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M12 2C8 2 4 6 4 10c0 4 2 6 4 8l4 4 4-4c2-2 4-4 4-8 0-4-4-8-8-8z"/></svg></div>
+            <h3 class="svc-title">Tooth Extraction</h3>
+            <p class="svc-desc">Careful, gentle removal of severely damaged or decayed teeth to protect overall oral health.</p>
+        </article>
+        <article class="service-card svc-item" data-cat="surgery">
+            <div class="svc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f46709" stroke-width="1.8" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9l-6-6z"/><path d="M9 3v6h6"/></svg></div>
+            <h3 class="svc-title">Wisdom Tooth Extraction</h3>
+            <p class="svc-desc">Surgical removal of impacted or problematic wisdom teeth to prevent pain, crowding, and infection.</p>
+        </article>
+    </div>
+</section>
+
+        <!-- ═══════════════ WHY US ═════════════════════════ -->
+        <section id="why-us" class="bg-ivory py-28">
+            <div class="mx-auto max-w-7xl flex flex-col gap-24 px-6 lg:px-10">
+
+                <!-- Row 1 -->
+                <div class="grid items-center gap-12 md:grid-cols-2">
+                    <div class="reveal-left relative overflow-hidden rounded-3xl shadow-xl">
+                        <img src="../assets/480772436_122112412670736343_1934782115206350542_n.jpg" alt="Treatment room" class="h-[420px] w-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-secondary/30 to-transparent"></div>
+                    </div>
+                    <div class="reveal-right">
+                        <span class="section-label">Clinical Excellence</span>
+                        <span class="gold-line"></span>
+                        <p class="mt-6 font-display text-6xl lg:text-7xl text-secondary stat-num" data-target="98" data-suffix="%">0%</p>
+                        <h3 class="mt-3 font-display text-3xl leading-snug">Clinical Acceptance Rate</h3>
+                        <p class="mt-5 text-secondary/70 leading-relaxed">Treatment plans are digitally previewed and reviewed in detail before we begin, reducing uncertainty and improving outcomes for every patient.</p>
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="grid items-center gap-12 md:grid-cols-2">
+                    <div class="md:order-2 reveal-right relative overflow-hidden rounded-3xl shadow-xl">
+                        <img src="../assets/480906448_122112412628736343_7437584152154700437_n.jpg" alt="Clinic reception" class="h-[420px] w-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-secondary/30 to-transparent"></div>
+                    </div>
+                    <div class="md:order-1 reveal-left">
+                        <span class="section-label">Concierge Access</span>
+                        <span class="gold-line"></span>
+                        <p class="mt-6 font-display text-6xl lg:text-7xl text-secondary">24/7</p>
+                        <h3 class="mt-3 font-display text-3xl leading-snug">Priority Access Protocol</h3>
+                        <p class="mt-5 text-secondary/70 leading-relaxed">Our concierge team coordinates urgent care, specialist referrals, and follow-up communication without delay — day or night.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ TESTIMONIALS ══════════════════ -->
+        <section id="testimonials" class="mx-auto max-w-7xl px-6 py-28 lg:px-10">
+            <div class="grid gap-12 lg:grid-cols-12 lg:items-center">
+                <div class="reveal lg:col-span-7 lg:flex lg:flex-col lg:justify-center">
+                    <span class="section-label">Patient Stories</span>
+                    <h2 class="font-display text-5xl lg:text-6xl text-secondary leading-tight">The Patient<br/>Experience</h2>
+
+                    <div class="mt-10" id="testimonialContent">
+                        <article id="testimonialArticle" class="testimonial-fade border-l-4 border-gold pl-8 py-2">
+                            <p id="testimonialQuote" class="font-display text-xl lg:text-2xl italic leading-relaxed text-secondary"></p>
+                            <div class="mt-6 flex items-center gap-4">
+                                <div>
+                                    <p id="testimonialName" class="text-base font-semibold text-secondary"></p>
+                                    <p id="testimonialTitle" class="mt-0.5 text-xs tracking-[0.22em] text-secondary/50"></p>
+                                </div>
+                            </div>
+                        </article>
+                        <div class="mt-8 flex gap-3">
+                            <button id="prevTestimonial" aria-label="Previous testimonial" class="rounded-full border border-secondary/25 p-3 text-secondary transition hover:border-primary hover:text-primary">&#8592;</button>
+                            <button id="nextTestimonial" aria-label="Next testimonial" class="rounded-full border border-secondary/25 p-3 text-secondary transition hover:border-primary hover:text-primary">&#8594;</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reveal relative overflow-hidden rounded-3xl lg:col-span-5 shadow-xl delay-200">
+                    <img src="../assets/480877265_122112631292736343_7297044902032121582_n.jpg" alt="Patient testimonial" class="h-full min-h-[580px] w-full object-cover" />
+                    <div class="absolute inset-0 bg-gradient-to-br from-transparent to-secondary/20"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ FAQ ════════════════════════════ -->
+        <section id="faq" class="bg-ivory py-28">
+            <div class="mx-auto max-w-3xl px-6">
+                <div class="reveal text-center mb-14">
+                    <span class="section-label">Common Questions</span>
+                    <h2 class="font-display text-5xl lg:text-6xl text-secondary">Frequently Asked</h2>
+                </div>
+                <div class="divide-y divide-secondary/12">
+                    <article class="faq-item reveal py-6">
+                        <button class="faq-trigger flex w-full items-center justify-between text-left text-base font-semibold text-secondary gap-4">
+                            Do you offer same-week smile consultations?
+                            <span class="faq-icon flex-shrink-0 text-2xl text-primary" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect class="h-line" x="3" y="9" width="14" height="2" rx="1" fill="currentColor"/><rect class="v-line" x="9" y="3" width="2" height="14" rx="1" fill="currentColor"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-panel pr-8"><p class="pt-4 text-secondary/70 leading-relaxed">Yes. We reserve consultation windows each week for cosmetic and restorative assessments.</p></div>
+                    </article>
+                    <article class="faq-item reveal py-6 delay-100">
+                        <button class="faq-trigger flex w-full items-center justify-between text-left text-base font-semibold text-secondary gap-4">
+                            Are sedation options available?
+                            <span class="faq-icon flex-shrink-0 text-2xl text-primary" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect class="h-line" x="3" y="9" width="14" height="2" rx="1" fill="currentColor"/><rect class="v-line" x="9" y="3" width="2" height="14" rx="1" fill="currentColor"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-panel pr-8"><p class="pt-4 text-secondary/70 leading-relaxed">We provide personalized comfort protocols including local anesthesia and physician-cleared sedation pathways.</p></div>
+                    </article>
+                    <article class="faq-item reveal py-6 delay-200">
+                        <button class="faq-trigger flex w-full items-center justify-between text-left text-base font-semibold text-secondary gap-4">
+                            How long does a veneer treatment take?
+                            <span class="faq-icon flex-shrink-0 text-2xl text-primary" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect class="h-line" x="3" y="9" width="14" height="2" rx="1" fill="currentColor"/><rect class="v-line" x="9" y="3" width="2" height="14" rx="1" fill="currentColor"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-panel pr-8"><p class="pt-4 text-secondary/70 leading-relaxed">Most veneer cases complete in two to three appointments depending on smile design complexity.</p></div>
+                    </article>
+                    <article class="faq-item reveal py-6 delay-300">
+                        <button class="faq-trigger flex w-full items-center justify-between text-left text-base font-semibold text-secondary gap-4">
+                            Do you coordinate with insurance providers?
+                            <span class="faq-icon flex-shrink-0 text-2xl text-primary" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect class="h-line" x="3" y="9" width="14" height="2" rx="1" fill="currentColor"/><rect class="v-line" x="9" y="3" width="2" height="14" rx="1" fill="currentColor"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-panel pr-8"><p class="pt-4 text-secondary/70 leading-relaxed">Our care coordinators assist with benefit documentation and pre-authorization whenever applicable.</p></div>
+                    </article>
+                    <article class="faq-item reveal py-6 delay-400">
+                        <button class="faq-trigger flex w-full items-center justify-between text-left text-base font-semibold text-secondary gap-4">
+                            Is emergency care available outside normal hours?
+                            <span class="faq-icon flex-shrink-0 text-2xl text-primary" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect class="h-line" x="3" y="9" width="14" height="2" rx="1" fill="currentColor"/><rect class="v-line" x="9" y="3" width="2" height="14" rx="1" fill="currentColor"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-panel pr-8"><p class="pt-4 text-secondary/70 leading-relaxed">Emergency triage support is available with an on-call pathway for severe pain, trauma, or post-op concerns.</p></div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ LOCATION ══════════════════════ -->
+        <section id="location" class="mx-auto max-w-7xl px-6 py-28 lg:px-10">
+            <div class="reveal text-center mb-14">
+                <span class="section-label">Find Us</span>
+                <h2 class="font-display text-5xl lg:text-6xl text-secondary">Visit the Clinic</h2>
+            </div>
+            <div class="grid gap-6 md:grid-cols-5">
+                <div class="reveal reveal-left md:col-span-3 overflow-hidden rounded-3xl border border-secondary/8 shadow-md">
+                    <iframe
+                        title="Map to TomFord Dental Clinic"
+                        class="h-full min-h-[380px] w-full"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.5527695830683!2d121.06384847577317!3d14.567548977883655!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c900146e03d1%3A0xb142a19afc3f4fe5!2sTomFord%20Dental%20Clinic!5e0!3m2!1sen!2sph!4v1776053299271!5m2!1sen!2sph"
+                        width="600" height="450"
+                        style="border:0"
+                        allowfullscreen
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+                <div class="reveal reveal-right md:col-span-2 rounded-3xl bg-secondary p-9 text-white flex flex-col justify-between delay-200">
+                    <div>
+                        <span class="section-label" style="color:#c9a96e">Get in Touch</span>
+                        <h3 class="mt-2 font-display text-3xl">TomFord Dental Clinic</h3>
+                        <div class="mt-6 space-y-3 text-white/80 text-sm leading-relaxed">
+                            <p id="locAddress">RB &amp; A BLDG., 166 Lakeview Drive, COR Kawilihan Lane, Pasig Blvd, Pasig, Philippines, 1600</p>
+                            <p><span class="text-white/50 text-xs uppercase tracking-wider">Mobile</span><br/><span id="locPhone">0995 418 8879</span></p>
+                            <p><span class="text-white/50 text-xs uppercase tracking-wider">Email</span><br/><a id="locEmail" href="mailto:tomford.dental@gmail.com" class="text-white/80 hover:text-white transition">tomford.dental@gmail.com</a></p>
+                            <p><span class="text-white/50 text-xs uppercase tracking-wider">WhatsApp</span><br/>+63 995 418 8879</p>
+                            <p><span class="text-white/50 text-xs uppercase tracking-wider">Hours</span><br/><span id="locHours">Mon–Sat &nbsp;9:00 AM – 7:00 PM</span></p>
+                        </div>
+                    </div>
+                    <a href="#book" class="magnetic-btn open-booking-modal mt-8 w-full text-center btn-primary block" data-booking-trigger="true">Book Consultation</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ═══════════════ BOOKING MODAL ════════════════════ -->
+    <div id="bookingModal" class="booking-modal" aria-hidden="true">
+        <div class="booking-backdrop" data-booking-close="true"></div>
+        <section class="booking-panel" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+            <div class="sticky top-0 z-10 flex items-center justify-between border-b border-secondary/10 bg-ivory px-7 py-5">
+                <div>
+                    <p class="text-xs tracking-[0.22em] text-primary uppercase">Schedule</p>
+                    <h2 id="bookingTitle" class="font-display text-3xl text-secondary">Book a Consultation</h2>
+                </div>
+                <button type="button" id="bookingCloseBtn" aria-label="Close booking form" class="booking-close rounded-full border border-secondary/20 px-4 py-1.5 text-sm text-secondary transition hover:text-primary hover:border-primary">Close</button>
+            </div>
+            <div class="px-7 py-7 sm:px-9">
+                <p class="text-secondary/60 text-sm">Choose a date and time. We'll confirm your availability.</p>
+                <p id="bookingClinicTagline" class="mt-1 text-xs text-secondary/40 italic">where every tooth matters.</p>
+                <p class="mt-3 text-xs text-secondary/50">📅 A Google Calendar invite will be emailed to you after booking.</p>
+
+                <form id="bookingForm" class="mt-8 grid gap-7">
+                    <label class="block">
+                        <span class="text-xs tracking-[0.18em] uppercase text-secondary/50">Full Name</span>
+                        <div class="input-wrap">
+                            <input id="fullName" name="fullName" required class="booking-input-v2" placeholder="Your full name" />
+                            <span class="input-line"></span>
+                        </div>
+                    </label>
+
+                    <label class="block">
+                        <span class="text-xs tracking-[0.18em] uppercase text-secondary/50">Email</span>
+                        <div class="input-wrap">
+                            <input id="email" name="email" type="email" required class="booking-input-v2" placeholder="you@example.com" />
+                            <span class="input-line"></span>
+                        </div>
+                    </label>
+
+                    <label class="block">
+                        <span class="text-xs tracking-[0.18em] uppercase text-secondary/50">Phone</span>
+                        <div class="input-wrap">
+                            <input id="phone" name="phone" type="tel" required class="booking-input-v2" placeholder="09XXXXXXXXX" maxlength="11" minlength="11" inputmode="numeric" />
+                            <span class="input-line"></span>
+                        </div>
+                    </label>
+
+                    <label class="block">
+                        <span class="text-xs tracking-[0.18em] uppercase text-secondary/50">Service</span>
+                        <div class="input-wrap">
+                            <select id="service" name="service" required class="booking-input-v2">
+                                <option value="" disabled selected>Loading services…</option>
+                            </select>
+                            <span class="input-line"></span>
+                        </div>
+                    </label>
+
+                    <!-- SLOT PICKER -->
+                    <div>
+                        <span class="text-xs tracking-[0.18em] uppercase text-secondary/50 block mb-3">Select a Date & Time</span>
+                        <div class="slot-picker-wrap">
+                            <!-- Nav -->
+                            <div class="slot-picker-nav">
+                                <button type="button" id="slotPrev" class="slot-nav-btn" disabled aria-label="Previous days">&#8592;</button>
+                                <span class="slot-week-label" id="slotWeekLabel">Loading availability…</span>
+                                <button type="button" id="slotNext" class="slot-nav-btn" aria-label="Next days">&#8594;</button>
+                            </div>
+                            <!-- Grid of day columns -->
+                            <div class="slot-grid" id="slotGrid">
+                                <!-- skeleton while loading -->
+                                <div class="slot-col"><div class="slot-loading"></div><div class="slot-loading"></div><div class="slot-loading"></div></div>
+                                <div class="slot-col"><div class="slot-loading"></div><div class="slot-loading"></div><div class="slot-loading"></div></div>
+                                <div class="slot-col"><div class="slot-loading"></div><div class="slot-loading"></div><div class="slot-loading"></div></div>
+                                <div class="slot-col"><div class="slot-loading"></div><div class="slot-loading"></div><div class="slot-loading"></div></div>
+                                <div class="slot-col"><div class="slot-loading"></div><div class="slot-loading"></div><div class="slot-loading"></div></div>
+                            </div>
+                            <!-- Selected display -->
+                            <div class="slot-selected-display" id="slotSelectedDisplay">
+                                📅 Selected: <span id="slotSelectedText"></span>
+                            </div>
+                        </div>
+                        <!-- Hidden inputs for form submission -->
+                        <input type="hidden" id="date" name="date" />
+                        <input type="hidden" id="time" name="time" />
+                    </div>
+
+                    <div class="pt-2">
+                        <button id="bookingSubmitBtn" type="submit" class="magnetic-btn btn-primary w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed">Request Booking</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <div id="bookingToast" class="hidden" aria-live="polite"></div>
+
+    <!-- ═══════════════ FOOTER ════════════════════════════ -->
+    <footer class="bg-white py-14 text-center border-t border-secondary/8">
+        <p class="font-display text-2xl text-secondary">TomFord Dental</p>
+        <p class="mt-1 text-xs tracking-[0.22em] text-secondary/40 uppercase">where every tooth matters.</p>
+        <div class="mt-6 flex justify-center gap-7 text-xs tracking-[0.18em] text-secondary/50">
+            <a href="#services" class="nav-link hover:text-white transition uppercase">Services</a>
+            <a href="#why-us" class="nav-link hover:text-white transition uppercase">Why Us</a>
+            <a href="#faq" class="nav-link hover:text-white transition uppercase">FAQ</a>
+            <a href="#location" class="nav-link hover:text-white transition uppercase">Contact</a>
+        </div>
+        <div class="mt-6 flex justify-center gap-5 text-secondary/40">
+            <a href="#" aria-label="Facebook" class="transition hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/></svg>
+            </a>
+            <a href="tel:+639954188879" aria-label="Phone" class="transition hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.68.68 0 0 0 .178.643l2.457 2.457a.68.68 0 0 0 .644.178l2.189-.547a1.75 1.75 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.6 18.6 0 0 1-7.01-4.42 18.6 18.6 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877z"/></svg>
+            </a>
+            <a href="mailto:tomford.dental@gmail.com" aria-label="Email" class="transition hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z"/></svg>
+            </a>
+            <a href="https://wa.me/639954188879" target="_blank" rel="noopener" aria-label="WhatsApp" class="transition hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/></svg>
+            </a>
+        </div>
+        <p class="mt-8 text-xs text-secondary/30">&copy; 2026 TomFord Dental Clinic. All rights reserved.</p>
+    </footer>
+
+    <script>
+    (function () {
+        'use strict';
+
+        // ─── CUSTOM CURSOR ──────────────────────────────────
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+        let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            dot.style.left = mouseX + 'px';
+            dot.style.top  = mouseY + 'px';
+            document.body.classList.add('cursor-active');
+        });
+
+        function animateRing() {
+            ringX += (mouseX - ringX) * 0.12;
+            ringY += (mouseY - ringY) * 0.12;
+            ring.style.left = ringX + 'px';
+            ring.style.top  = ringY + 'px';
+            requestAnimationFrame(animateRing);
+        }
+        animateRing();
+
+        document.querySelectorAll('a, button, .service-card, input, select, textarea').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+        });
+
+        // ─── HERO WORD REVEAL ───────────────────────────────
+        const heroHeading = document.getElementById('heroHeading');
+        const heroWords = ['Where', 'Every', 'Tooth', 'Matters.'];
+        heroWords.forEach((word, i) => {
+            const wrap = document.createElement('span');
+            wrap.className = 'hero-word-wrap';
+            const inner = document.createElement('span');
+            inner.className = 'hero-word';
+            inner.textContent = word;
+            inner.style.animationDelay = (0.35 + i * 0.22) + 's';
+            if (i < heroWords.length - 1) inner.textContent += '\u00A0';
+            wrap.appendChild(inner);
+            heroHeading.appendChild(wrap);
+        });
+
+        // ─── HERO PARALLAX ──────────────────────────────────
+        const heroBg = document.getElementById('heroBg');
+        function onScroll() {
+            const s = window.scrollY;
+            if (heroBg) heroBg.style.transform = 'translateY(' + (s * 0.35) + 'px)';
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        // ─── BOKEH PARTICLES ────────────────────────────────
+        const particleContainer = document.getElementById('heroParticles');
+        const particleCount = 22;
+        for (let i = 0; i < particleCount; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = 4 + Math.random() * 18;
+            const left = Math.random() * 100;
+            const delay = Math.random() * 12;
+            const dur   = 10 + Math.random() * 14;
+            p.style.cssText = `width:${size}px;height:${size}px;left:${left}%;bottom:-${size}px;animation-duration:${dur}s;animation-delay:${delay}s;`;
+            particleContainer.appendChild(p);
+        }
+
+        // ─── NAV SCROLL ─────────────────────────────────────
+        const nav = document.getElementById('navbar');
+        function updateNavState() { nav.classList.toggle('scrolled', window.scrollY > 50); }
+        updateNavState();
+        window.addEventListener('scroll', updateNavState, { passive: true });
+
+        // ─── ACTIVE NAV LINK ────────────────────────────────
+        (function () {
+            const links = Array.from(document.querySelectorAll('.nav-link')).filter(l => {
+                const h = l.getAttribute('href');
+                return h && h.startsWith('#') && !l.classList.contains('book-now');
+            });
+            const sections = links.map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+            function updateActive() {
+                const pos = window.scrollY + nav.offsetHeight + 8;
+                let matched = false;
+                for (let i = 0; i < sections.length; i++) {
+                    const top = sections[i].offsetTop;
+                    if (pos >= top && pos < top + sections[i].offsetHeight) {
+                        links.forEach(l => l.classList.remove('active'));
+                        links[i].classList.add('active');
+                        matched = true; break;
+                    }
+                }
+                if (!matched) links.forEach(l => l.classList.remove('active'));
+            }
+            window.addEventListener('scroll', updateActive, { passive: true });
+            window.addEventListener('resize', updateActive);
+            updateActive();
+        })();
+
+        // ─── MOBILE MENU ─────────────────────────────────────
+        const menuBtn    = document.getElementById('menuBtn');
+        const menuIcon   = document.getElementById('menuIcon');
+        const closeIcon  = document.getElementById('closeIcon');
+        const drawer     = document.getElementById('mobileDrawer');
+
+        function closeMenu() {
+            drawer.classList.remove('open');
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        }
+
+        menuBtn.addEventListener('click', () => {
+            drawer.classList.toggle('open');
+            menuIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+        });
+
+        // ─── SMOOTH SCROLL + CLOSE MENU ──────────────────────
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', e => {
+                const href = link.getAttribute('href');
+                if (!href || !href.startsWith('#')) return;
+                const target = document.querySelector(href);
+                if (!target) return;
+                e.preventDefault();
+                closeMenu();
+                window.scrollTo({ top: target.offsetTop - nav.offsetHeight, behavior: 'smooth' });
+            });
+        });
+
+        // ─── INTERSECTION OBSERVER (scroll reveals) ──────────
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => revealObserver.observe(el));
+
+        // ─── COUNT-UP ANIMATION ──────────────────────────────
+        function countUp(el) {
+            const target = parseInt(el.dataset.target, 10);
+            const suffix = el.dataset.suffix || '';
+            const dur = 1600;
+            const step = dur / target;
+            let current = 0;
+            el.classList.add('counted');
+            const interval = setInterval(() => {
+                current += Math.ceil(target / (dur / 16));
+                if (current >= target) { current = target; clearInterval(interval); }
+                el.textContent = current.toLocaleString() + suffix;
+            }, 16);
+        }
+
+        const countObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.classList.contains('counted')) {
+                    countUp(entry.target);
+                    countObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.stat-num[data-target]').forEach(el => countObserver.observe(el));
+
+        // ─── 3D CARD TILT ────────────────────────────────────
+        document.querySelectorAll('.service-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top  + rect.height / 2;
+                const rx = ((e.clientY - cy) / (rect.height / 2)) * -8;
+                const ry = ((e.clientX - cx) / (rect.width  / 2)) *  8;
+                card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+
+        // ─── MAGNETIC BUTTON ─────────────────────────────────
+        document.querySelectorAll('.magnetic-btn').forEach(btn => {
+            btn.addEventListener('mousemove', e => {
+                const rect = btn.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top  + rect.height / 2;
+                const dx = (e.clientX - cx) * 0.25;
+                const dy = (e.clientY - cy) * 0.25;
+                btn.style.transform = `translate(${dx}px, ${dy}px)`;
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = '';
+            });
+        });
+
+        // ─── FAQ ─────────────────────────────────────────────
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const trigger = item.querySelector('.faq-trigger');
+            const panel   = item.querySelector('.faq-panel');
+            panel.style.maxHeight = null;
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+            trigger.addEventListener('click', () => {
+                const isOpen = item.classList.toggle('active');
+                if (isOpen) {
+                    panel.style.maxHeight = panel.scrollHeight + 'px';
+                    trigger.setAttribute('aria-expanded', 'true');
+                    faqItems.forEach(other => {
+                        if (other === item) return;
+                        other.classList.remove('active');
+                        const op = other.querySelector('.faq-panel');
+                        const ot = other.querySelector('.faq-trigger');
+                        if (op) op.style.maxHeight = null;
+                        if (ot) ot.setAttribute('aria-expanded', 'false');
+                    });
+                } else {
+                    panel.style.maxHeight = null;
+                    trigger.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+        window.addEventListener('resize', () => {
+            faqItems.forEach(item => {
+                if (item.classList.contains('active')) {
+                    const p = item.querySelector('.faq-panel');
+                    if (p) p.style.maxHeight = p.scrollHeight + 'px';
+                }
+            });
+        });
+
+        // ─── TESTIMONIALS ────────────────────────────────────
+        const testimonialData = [
+            { quote: "The precision and calm in every appointment made complex treatment feel effortless. My smile looks natural and refined.", name: "Andrea Lim", title: "ENTREPRENEUR" },
+            { quote: "From diagnostics to final restorations, the team explained every decision with clarity. The results exceeded my expectations.", name: "Michael Santos", title: "ARCHITECT" },
+            { quote: "I came in for emergency care and stayed for long-term treatment. The service standards here are truly world-class.", name: "Danica Rivera", title: "CREATIVE DIRECTOR" },
+            { quote: "Tomford Clinic combines technology and empathy in a way that feels rare. Every visit has been smooth and reassuring.", name: "Paolo de Vera", title: "PRIVATE CLIENT" },
+        ];
+
+        const quoteEl   = document.getElementById('testimonialQuote');
+        const nameEl    = document.getElementById('testimonialName');
+        const titleEl   = document.getElementById('testimonialTitle');
+        const articleEl = document.getElementById('testimonialArticle');
+        let currentIndex = 0;
+
+        function renderTestimonial(idx) {
+            if (articleEl) articleEl.style.opacity = '0';
+            setTimeout(() => {
+                quoteEl.textContent  = '\u201C' + testimonialData[idx].quote + '\u201D';
+                nameEl.textContent   = testimonialData[idx].name;
+                titleEl.textContent  = testimonialData[idx].title;
+                if (articleEl) articleEl.style.opacity = '1';
+            }, 180);
+        }
+
+        document.getElementById('prevTestimonial').addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + testimonialData.length) % testimonialData.length;
+            renderTestimonial(currentIndex);
+        });
+        document.getElementById('nextTestimonial').addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % testimonialData.length;
+            renderTestimonial(currentIndex);
+        });
+        renderTestimonial(currentIndex);
+
+        // ─── BOOKING MODAL ───────────────────────────────────
+        const bookingModal     = document.getElementById('bookingModal');
+        const bookingCloseBtn  = document.getElementById('bookingCloseBtn');
+        const bookingForm      = document.getElementById('bookingForm');
+        const bookingToast     = document.getElementById('bookingToast');
+        const bookingSubmitBtn = document.getElementById('bookingSubmitBtn');
+        const bookingDateInput = document.getElementById('date');
+
+        // Direct call to Google Apps Script web app.
+        // GAS follows a 302 to googleusercontent.com which sets Access-Control-Allow-Origin:*,
+        // so simple requests (GET with no custom headers, POST with FormData) work without preflight.
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwJOvWKTIUflbBXiYTxPdO89jaKLhgcknCHlfObt7NTdfqih1JCcfl0r1yXxUM8wvu3VQ/exec';
+
+        function showBookingToast(msg, isError) {
+            bookingToast.classList.remove('hidden', 'toast-show', 'toast-error', 'toast-success');
+            bookingToast.innerHTML = msg;
+            bookingToast.classList.add(isError ? 'toast-error' : 'toast-success');
+            if (bookingToast.hideTimeout) clearTimeout(bookingToast.hideTimeout);
+            requestAnimationFrame(() => bookingToast.classList.add('toast-show'));
+            bookingToast.hideTimeout = setTimeout(() => {
+                bookingToast.classList.remove('toast-show');
+                setTimeout(() => bookingToast.classList.add('hidden'), 260);
+            }, 5000);
+        }
+
+        function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+        function openBookingModal() {
+            bookingModal.classList.add('open');
+            bookingModal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('no-scroll');
+            closeMenu();
+        }
+        function closeBookingModal() {
+            bookingModal.classList.remove('open');
+            bookingModal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('no-scroll');
+        }
+
+        document.querySelectorAll('[data-booking-trigger="true"]').forEach(t => {
+            t.addEventListener('click', e => { e.preventDefault(); openBookingModal(); });
+        });
+
+        bookingCloseBtn.addEventListener('click', closeBookingModal);
+        bookingModal.addEventListener('click', e => {
+            if (e.target.closest('[data-booking-close="true"]')) closeBookingModal();
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && bookingModal.classList.contains('open')) closeBookingModal();
+        });
+
+        bookingForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const fullName   = document.getElementById('fullName').value.trim();
+            const emailValue = document.getElementById('email').value.trim();
+            const phoneRaw   = document.getElementById('phone').value;
+            const phoneDigits= phoneRaw.replace(/\D/g, '');
+            const dateValue  = document.getElementById('date').value;
+            const timeValue  = document.getElementById('time').value;
+            const serviceValue = document.getElementById('service').value;
+
+            if (!fullName)                    { showBookingToast('Please enter your full name.', true); return; }
+            if (!validateEmail(emailValue))   { showBookingToast('Please enter a valid email address.', true); return; }
+            if (phoneDigits.length !== 11)    { showBookingToast('Please enter a valid phone number (11 digits).', true); return; }
+            if (!dateValue || !timeValue) { showBookingToast('Please select an available time slot.', true); return; }
+            if (!serviceValue) { showBookingToast('Please select a service.', true); return; }
+
+            const orig = bookingSubmitBtn.innerText;
+            bookingSubmitBtn.disabled = true;
+            bookingSubmitBtn.innerText = 'Requesting...';
+            bookingToast.classList.add('hidden');
+
+            const body = new FormData(bookingForm);
+            body.set('phone', phoneDigits);
+
+            fetch(scriptURL, { method: 'POST', body })
+                .then(r => r.json().catch(() => ({ success: false, error: 'Invalid server response' })))
+                .then(result => {
+                    if (!result || result.success !== true) {
+                        // Server rejected — most likely slot was taken, or validation failed
+                        const msg = (result && result.error) || 'Could not complete booking.';
+                        showBookingToast(msg, true);
+                        bookingSubmitBtn.disabled = false;
+                        bookingSubmitBtn.innerText = orig;
+                        // Re-fetch fresh slots so the user can pick a new one
+                        if (typeof window.__refreshSlots === 'function') window.__refreshSlots();
+                        return;
+                    }
+                    showBookingToast('Booking request sent! We will confirm your slot shortly.', false);
+                    bookingForm.reset();
+                    bookingSubmitBtn.disabled = false;
+                    bookingSubmitBtn.innerText = orig;
+                    closeBookingModal();
+                })
+                .catch(err => {
+                    console.error(err);
+                    showBookingToast('Something went wrong. Please try again or call us directly.', true);
+                    bookingSubmitBtn.disabled = false;
+                    bookingSubmitBtn.innerText = orig;
+                });
+        });
+
+        // ─── DYNAMIC SERVICES LOADING ─────────────────────
+        (function loadServices() {
+            const SERVICES = [
+                'Consultation',
+                'TMJ Consultation',
+                'Periapical X-ray',
+                'Teeth Whitening',
+                'Jacket Crown',
+                'Fixed Bridge',
+                'Veneers',
+                'Dentures',
+                'Root Canal Treatment',
+                'Oral Prophylaxis',
+                'Deep Scaling',
+                'Fluoride Treatment',
+                'Orthodontic Treatment (Braces)',
+                'Dental Splint',
+                'Retainers',
+                'Night Guard',
+                'Tooth Extraction',
+                'Wisdom Tooth Extraction',
+                'Tooth Filling',
+                'Pit & Fissure Sealant',
+                'Esthetic Restoration'
+            ];
+
+            function populateServices(list) {
+                const sel = document.getElementById('service');
+                if (!sel) return;
+                sel.innerHTML = '<option value="" disabled selected>Select a service…</option>';
+                list.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    sel.appendChild(opt);
+                });
+            }
+
+            // Try to fetch live list from Apps Script
+            // The same scriptURL used for form submission can serve a services list
+            // if the Apps Script has a doGet handler with ?action=getServices
+            // Falls back to local hardcoded list immediately — no loading spinner needed
+            populateServices(SERVICES);
+
+            try {
+                fetch(scriptURL + '?action=getServices', { method: 'GET' })
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                        if (data && Array.isArray(data.services) && data.services.length > 0) {
+                            populateServices(data.services);
+                        }
+                    })
+                    .catch(() => { /* silently keep local list */ });
+            } catch(e) { /* keep local list */ }
+        })();
+
+        // ─── SLOT PICKER ─────────────────────────────────────
+        (function initSlotPicker() {
+            var ALL_SLOTS     = {};   // { "YYYY-MM-DD": ["09:00","09:30",...] }
+            var SLOT_DUR      = 30;   // minutes, overridden by API
+            var VIEW_SIZE     = 5;    // columns visible
+            var viewOffset    = 0;    // index into sortedDates
+            var sortedDates   = [];   // all dates returned by API
+            var selectedDate  = '';
+            var selectedTime  = '';
+
+            var grid         = document.getElementById('slotGrid');
+            var prevBtn      = document.getElementById('slotPrev');
+            var nextBtn      = document.getElementById('slotNext');
+            var weekLabel    = document.getElementById('slotWeekLabel');
+            var selDisplay   = document.getElementById('slotSelectedDisplay');
+            var selText      = document.getElementById('slotSelectedText');
+            var dateInput    = document.getElementById('date');
+            var timeInput    = document.getElementById('time');
+
+            // Responsive column count
+            function getViewSize() {
+                return window.innerWidth < 521 ? 3 : 5;
+            }
+
+            // Format time for display: "09:00" → "9:00 AM"
+            function fmtTime(t) {
+                var p = t.split(':').map(Number);
+                var h = p[0], m = p[1];
+                return (h%12||12) + ':' + (m<10?'0':'')+m + ' ' + (h>=12?'PM':'AM');
+            }
+
+            // Format date for column header
+            function fmtDateHeader(dateStr) {
+                var p   = dateStr.split('-').map(Number);
+                var d   = new Date(p[0],p[1]-1,p[2]);
+                var now = new Date();
+                var today   = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+                var tomorrow= new Date(today.getTime()+86400000);
+                var DAYS  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                var MONTHS= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                var label, dayName, datePart;
+                if (+d === +today)   label = 'Today';
+                else if (+d === +tomorrow) label = 'Tomorrow';
+                else                 label = 'This Week';
+                dayName  = DAYS[d.getDay()];
+                datePart = MONTHS[p[1]-1]+' '+p[2];
+                return { label:label, dayName:dayName, datePart:datePart };
+            }
+
+            function renderGrid() {
+                VIEW_SIZE = getViewSize();
+                var slice = sortedDates.slice(viewOffset, viewOffset + VIEW_SIZE);
+                grid.style.gridTemplateColumns = 'repeat('+VIEW_SIZE+',1fr)';
+
+                grid.innerHTML = '';
+                slice.forEach(function(dateStr) {
+                    var slots  = ALL_SLOTS[dateStr] || [];
+                    var hdr    = fmtDateHeader(dateStr);
+                    var col    = document.createElement('div');
+                    col.className = 'slot-col';
+
+                    // Header
+                    var hdrDiv = document.createElement('div');
+                    hdrDiv.className = 'slot-day-hdr';
+                    hdrDiv.innerHTML =
+                        '<span class="slot-day-label">'+hdr.label+'</span>'
+                        +'<span class="slot-day-name">'+hdr.dayName+'</span>'
+                        +'<span class="slot-day-date">'+hdr.datePart+'</span>';
+                    col.appendChild(hdrDiv);
+
+                    if (slots.length === 0) {
+                        var empty = document.createElement('p');
+                        empty.className = 'slot-empty';
+                        empty.textContent = 'No slots';
+                        col.appendChild(empty);
+                    } else {
+                        slots.forEach(function(t) {
+                            var btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'slot-btn' + (selectedDate===dateStr && selectedTime===t ? ' selected' : '');
+                            btn.textContent = fmtTime(t);
+                            btn.dataset.date = dateStr;
+                            btn.dataset.time = t;
+                            btn.addEventListener('click', function() {
+                                selectedDate = this.dataset.date;
+                                selectedTime = this.dataset.time;
+                                dateInput.value = selectedDate;
+                                timeInput.value = selectedTime;
+                                // Update display
+                                var hd = fmtDateHeader(selectedDate);
+                                selText.textContent = hd.dayName+', '+hd.datePart+' at '+fmtTime(selectedTime);
+                                selDisplay.classList.add('visible');
+                                renderGrid(); // re-render to update selected state
+                            });
+                            col.appendChild(btn);
+                        });
+                    }
+                    grid.appendChild(col);
+                });
+
+                // Update nav buttons
+                prevBtn.disabled = viewOffset === 0;
+                nextBtn.disabled = viewOffset + VIEW_SIZE >= sortedDates.length;
+
+                // Week label
+                if (sortedDates.length > 0) {
+                    var s = sortedDates[viewOffset];
+                    var e = sortedDates[Math.min(viewOffset+VIEW_SIZE-1, sortedDates.length-1)];
+                    var sp = s.split('-'); var ep = e.split('-');
+                    var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    weekLabel.textContent = MONTHS[sp[1]-1]+' '+sp[2]+' – '+MONTHS[ep[1]-1]+' '+ep[2]+', '+ep[0];
+                }
+            }
+
+            function showSkeleton() {
+                VIEW_SIZE = getViewSize();
+                grid.style.gridTemplateColumns = 'repeat('+VIEW_SIZE+',1fr)';
+                grid.innerHTML = '';
+                for (var i=0;i<VIEW_SIZE;i++) {
+                    var col = document.createElement('div');
+                    col.className = 'slot-col';
+                    for (var j=0;j<4;j++) {
+                        var sk = document.createElement('div');
+                        sk.className = 'slot-loading';
+                        col.appendChild(sk);
+                    }
+                    grid.appendChild(col);
+                }
+                weekLabel.textContent = 'Loading availability…';
+            }
+
+            function fetchSlots() {
+                showSkeleton();
+                sortedDates = []; // reset so retry works
+                var today = new Date();
+                var from = today.getFullYear()+'-'
+                    +String(today.getMonth()+1).padStart(2,'0')+'-'
+                    +String(today.getDate()).padStart(2,'0');
+                // cache-bust so browser/CDN never returns a stale slot response
+                var bust = '&_=' + Date.now();
+                fetch(scriptURL+'?action=getSlots&from='+from+'&days=30'+bust, {method:'GET', cache:'no-store'})
+                    .then(function(r){
+                        if (!r.ok) {
+                            return r.text().then(function(t){ throw new Error('HTTP '+r.status+': '+t.slice(0,200)); });
+                        }
+                        return r.json();
+                    })
+                    .then(function(data) {
+                        if (!data || !data.slots) {
+                            var errMsg = (data && data.error) ? data.error : 'No slots returned';
+                            console.error('[TomFord Slots] Bad response:', data);
+                            showSlotError(errMsg);
+                            return;
+                        }
+                        ALL_SLOTS   = data.slots;
+                        SLOT_DUR    = data.slotDuration || 30;
+                        sortedDates = Object.keys(ALL_SLOTS).sort();
+                        viewOffset  = 0;
+                        renderGrid();
+                    })
+                    .catch(function(err) {
+                        console.error('[TomFord Slots] Fetch error:', err);
+                        showSlotError(err.message || 'Network error');
+                    });
+            }
+
+            function showSlotError(msg) {
+                grid.innerHTML = '';
+                weekLabel.innerHTML =
+                    '<span style="color:#c0392b;font-size:13px;">⚠ Could not load slots</span>'
+                    +'<br><span style="color:#888;font-size:11px;">'+msg+'</span>'
+                    +'<br><button onclick="window.__retrySlots&&window.__retrySlots()" style="margin-top:8px;background:#f46709;color:#fff;border:none;border-radius:20px;padding:6px 18px;font-size:12px;cursor:pointer;">↺ Retry</button>';
+                window.__retrySlots = function(){ fetchSlots(); };
+            }
+
+            // Nav buttons
+            prevBtn.addEventListener('click', function(){
+                if (viewOffset > 0) { viewOffset = Math.max(0, viewOffset-VIEW_SIZE); renderGrid(); }
+            });
+            nextBtn.addEventListener('click', function(){
+                VIEW_SIZE = getViewSize();
+                if (viewOffset+VIEW_SIZE < sortedDates.length) { viewOffset+=VIEW_SIZE; renderGrid(); }
+            });
+
+            window.addEventListener('resize', function(){ VIEW_SIZE=getViewSize(); renderGrid(); });
+
+            // Fetch EVERY time modal opens — so a brand-new booking in
+            // another tab / by the clinic is reflected immediately on reopen.
+            document.querySelectorAll('[data-booking-trigger="true"]').forEach(function(el){
+                el.addEventListener('click', function(){
+                    // Clear prior selection + re-fetch fresh availability
+                    selectedDate = null;
+                    selectedTime = null;
+                    dateInput.value = '';
+                    timeInput.value = '';
+                    selDisplay.classList.remove('visible');
+                    fetchSlots();
+                });
+            });
+
+            // Also refresh after a successful booking so the submitted slot
+            // drops out of the picker the moment the modal is reopened
+            // (belt-and-braces — the open handler above also refires).
+            window.__refreshSlots = function() { fetchSlots(); };
+        })();
+
+        // ─── DYNAMIC CLINIC CONFIG ────────────────────────
+        (function loadClinicConfig() {
+            // Defaults (shown immediately, replaced if fetch succeeds)
+            const DEFAULTS = {
+                CLINIC_NAME:    'TomFord Dental',
+                CLINIC_ADDRESS: 'RB & A BLDG., 166 Lakeview Drive, Pasig',
+                CLINIC_PHONE:   '0995 418 8879',
+                CLINIC_EMAIL:   'tomford.dental@gmail.com',
+                CLINIC_HOURS:   'Mon–Sat  9:00 AM – 7:00 PM',
+            };
+
+            function applyConfig(cfg) {
+                // Update hours hint in booking form
+                const hoursHint = document.getElementById('clinicHoursHint');
+                if (hoursHint && cfg.CLINIC_HOURS) {
+                    hoursHint.textContent = 'Clinic hours: ' + cfg.CLINIC_HOURS;
+                }
+                // Update form tagline
+                const formTagline = document.getElementById('bookingClinicTagline');
+                if (formTagline && cfg.BOOKING_TAGLINE) {
+                    formTagline.textContent = cfg.BOOKING_TAGLINE;
+                }
+                // Update location section details
+                const locAddress = document.getElementById('locAddress');
+                if (locAddress && cfg.CLINIC_ADDRESS) locAddress.textContent = cfg.CLINIC_ADDRESS;
+                const locPhone = document.getElementById('locPhone');
+                if (locPhone && cfg.CLINIC_PHONE) locPhone.textContent = cfg.CLINIC_PHONE;
+                const locEmail = document.getElementById('locEmail');
+                if (locEmail && cfg.CLINIC_EMAIL) {
+                    locEmail.textContent = cfg.CLINIC_EMAIL;
+                    locEmail.href = 'mailto:' + cfg.CLINIC_EMAIL;
+                }
+                const locHours = document.getElementById('locHours');
+                if (locHours && cfg.CLINIC_HOURS) locHours.textContent = cfg.CLINIC_HOURS;
+            }
+
+            // Apply defaults immediately
+            applyConfig(DEFAULTS);
+
+            // Try to fetch live config
+            try {
+                fetch(scriptURL + '?action=getConfig', { method: 'GET' })
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                        if (data && data.config) applyConfig(data.config);
+                    })
+                    .catch(() => {});
+            } catch(e) {}
+        })();
+
+        // ─── SERVICE CARD STAGGER REVEAL ─────────────────
+        (function () {
+            var cards = Array.prototype.slice.call(document.querySelectorAll('.service-card'));
+            if (!cards.length) return;
+            var obs = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+                    var card = entry.target;
+                    var visibleIdx = cards.filter(function(c) {
+                        return !c.classList.contains('hidden-item');
+                    }).indexOf(card);
+                    card.style.transitionDelay = Math.max(0, (visibleIdx % 4) * 55) + 'ms';
+                    card.classList.add('svc-in');
+                    obs.unobserve(card);
+                });
+            }, { threshold: 0.08 });
+            cards.forEach(function (card) { obs.observe(card); });
+        })();
+
+        // ─── SERVICE FILTER TABS ──────────────────────────
+        (function () {
+            const tabs = document.querySelectorAll('.svc-tab');
+            const items = document.querySelectorAll('.svc-item');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const cat = tab.dataset.cat;
+                    items.forEach(item => {
+                        if (cat === 'all' || item.dataset.cat === cat) {
+                            item.classList.remove('hidden-item');
+                        } else {
+                            item.classList.add('hidden-item');
+                        }
+                    });
+                });
+            });
+        })();
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('book') === '1' || window.location.hash === '#book') openBookingModal();
+
+    })();
+    </script>
+</body>
+</html>

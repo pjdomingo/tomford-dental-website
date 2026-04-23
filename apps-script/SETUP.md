@@ -1,0 +1,81 @@
+# TomFord Dental — Apps Script Setup
+
+## 1. Open the Google Sheet
+Open the existing Google Sheet connected to the booking form.
+
+## 2. Open Apps Script
+Go to **Extensions → Apps Script**.  
+Replace ALL existing code with the contents of `Code.gs`.
+
+## 3. Create these Sheet tabs
+
+### Tab: `Services`
+Column A — one service per row (no header row needed):
+```
+Consultation
+TMJ Consultation
+Periapical X-ray
+Teeth Whitening
+Jacket Crown
+Fixed Bridge
+Veneers
+Dentures
+Root Canal Treatment
+Oral Prophylaxis
+Deep Scaling
+Fluoride Treatment
+Orthodontic Treatment (Braces)
+Dental Splint
+Retainers
+Night Guard
+Tooth Extraction
+Wisdom Tooth Extraction
+Tooth Filling
+Pit & Fissure Sealant
+Esthetic Restoration
+```
+
+### Tab: `Config`
+Column A = Key, Column B = Value:
+| Key | Value |
+|-----|-------|
+| CLINIC_NAME | TomFord Dental |
+| CLINIC_ADDRESS | RB & A BLDG., 166 Lakeview Drive, COR Kawilihan Lane, Pasig Blvd, Pasig, Philippines 1600 |
+| CLINIC_PHONE | 0995 418 8879 |
+| CLINIC_EMAIL | tomford.dental@gmail.com |
+| CLINIC_HOURS | Mon–Sat  9:00 AM – 7:00 PM |
+| CONCIERGE_EMAIL | tomford.dental@gmail.com |
+| CALENDAR_DURATION_MINS | 60 |
+| BOOKING_TAGLINE | where every tooth matters. |
+| OPEN_TIME               | 09:00 |
+| CLOSE_TIME              | 19:00 |
+| SLOT_DURATION_MINS      | 30 |
+| OPEN_DAYS               | 1,2,3,4,5,6 |
+| MAX_BOOKINGS_PER_SLOT   | 1 |
+| CALENDAR_ID             | primary |
+| SLOT_BUFFER_MINS        | 60 |
+| ADVANCE_BOOKING_DAYS    | 30 |
+
+> **CONCIERGE_EMAIL** is never sent to the frontend. Edit it here to change where notification emails go.
+
+> **OPEN_DAYS** uses 0=Sunday, 1=Monday … 6=Saturday. **CALENDAR_ID**: use `primary` for the clinic owner's main calendar. Any event on that calendar will block that time slot.
+
+## 4. Deploy as Web App
+1. Click **Deploy → New deployment**
+2. Type: **Web App**
+3. Execute as: **Me**
+4. Who has access: **Anyone**
+5. Click **Deploy**
+6. Copy the **Web App URL**
+
+## 5. Update the website
+Replace the `scriptURL` value in `v1/index.html` with your new Web App URL.
+
+## 6. Grant Gmail permissions
+On first run, Apps Script will ask for Gmail permission. Click **Allow**.
+
+## 7. Test
+Submit a test booking on the website. You should:
+- See a new row in the `Appointments` tab
+- Receive a branded confirmation email (patient)
+- Receive a notification email (concierge)
