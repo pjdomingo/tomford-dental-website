@@ -76,16 +76,18 @@ Column A = Key, Column B = Value:
 4. Who has access: **Anyone**
 5. Click **Deploy** → copy the **Web App URL**
 
-## 5. Set SCRIPT_URL in Cloudflare (one-time)
+## 5. Update config.json with the Apps Script URL
 
-The website never calls Apps Script directly — it goes through a Cloudflare proxy at `/api`.  
-You only need to set the real URL **once** in Cloudflare:
+The website reads the Apps Script URL from `/config.json` at the root of the repo.  
+Open `config.json` and paste in the Web App URL from step 4:
 
-1. Cloudflare Dashboard → **Workers & Pages** → `tomford-dental-website`
-2. **Settings → Environment Variables → Add variable**
-3. Name: `SCRIPT_URL`  
-   Value: *(paste the Web App URL from step 4)*
-4. Click **Save** — done. The frontend code never needs to change.
+```json
+{
+  "scriptUrl": "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"
+}
+```
+
+Commit and push — Cloudflare deploys automatically. The HTML files never need to change.
 
 ## 6. Grant Gmail permissions
 On first run, Apps Script will ask for Gmail/Calendar permission. Click **Allow**.

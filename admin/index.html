@@ -586,10 +586,13 @@
 
 <script>
 // ── Config ─────────────────────────────────────────────────────────────────
-// All requests go through our own /api proxy (Cloudflare Pages Function).
-// The real Apps Script URL lives in the SCRIPT_URL env var on Cloudflare —
-// update it there when redeploying Apps Script. Never touch this line again.
-const SCRIPT_URL = '/api';
+// Script URL is loaded from /config.json — never hardcoded here.
+// To update after an Apps Script redeploy: change config.json and push. Done.
+let SCRIPT_URL = '';
+const _configReady = fetch('/config.json')
+  .then(r => r.json())
+  .then(cfg => { SCRIPT_URL = cfg.scriptUrl || ''; })
+  .catch(() => {});
 
 // ── State ──────────────────────────────────────────────────────────────────
 let token      = '';
@@ -651,9 +654,11 @@ function showApp() {
   loadData();
 }
 
-// Auto-login from session
-const savedToken = sessionStorage.getItem('tfd_token');
-if (savedToken) { token = savedToken; showApp(); }
+// Auto-login from session — wait for config to load first so SCRIPT_URL is set
+_configReady.then(() => {
+  const savedToken = sessionStorage.getItem('tfd_token');
+  if (savedToken) { token = savedToken; showApp(); }
+});
 
 // ── Data ───────────────────────────────────────────────────────────────────
 function loadData() {

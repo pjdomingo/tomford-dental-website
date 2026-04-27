@@ -1309,10 +1309,10 @@
         const bookingDateInput = document.getElementById('date');
 
         // Direct call to Google Apps Script web app.
-        // All requests go through our own /api proxy (Cloudflare Pages Function).
-        // The real Apps Script URL lives in the SCRIPT_URL env var on Cloudflare —
-        // update it there when redeploying Apps Script. Never touch this line again.
-        const scriptURL = '/api';
+        // Script URL is loaded from /config.json — never hardcoded here.
+        // To update after an Apps Script redeploy: change config.json and push. Done.
+        let scriptURL = '';
+        fetch('/config.json').then(r => r.json()).then(cfg => { scriptURL = cfg.scriptUrl || ''; }).catch(() => {});
 
         function showBookingToast(msg, isError) {
             bookingToast.classList.remove('hidden', 'toast-show', 'toast-error', 'toast-success');
