@@ -45,37 +45,80 @@ Column A = Key, Column B = Value:
 | CLINIC_EMAIL | tomford.dental@gmail.com |
 | CLINIC_HOURS | Mon–Sat  9:00 AM – 7:00 PM |
 | CONCIERGE_EMAIL | tomford.dental@gmail.com |
+| ADMIN_TOKEN | (set a secret password — used by the admin panel login) |
+| ADMIN_URL | https://tomforddental.com/admin |
 | CALENDAR_DURATION_MINS | 60 |
 | BOOKING_TAGLINE | where every tooth matters. |
-| OPEN_TIME               | 09:00 |
-| CLOSE_TIME              | 19:00 |
-| SLOT_DURATION_MINS      | 30 |
-| OPEN_DAYS               | 1,2,3,4,5,6 |
-| MAX_BOOKINGS_PER_SLOT   | 1 |
-| CALENDAR_ID             | primary |
-| SLOT_BUFFER_MINS        | 60 |
-| ADVANCE_BOOKING_DAYS    | 30 |
+| OPEN_TIME | 09:00 |
+| CLOSE_TIME | 19:00 |
+| SLOT_DURATION_MINS | 30 |
+| OPEN_DAYS | 1,2,3,4,5,6 |
+| MAX_BOOKINGS_PER_SLOT | 1 |
+| CALENDAR_ID | (your clinic Google Calendar ID) |
+| SLOT_BUFFER_MINS | 60 |
+| ADVANCE_BOOKING_DAYS | 30 |
 
-> **CONCIERGE_EMAIL** is never sent to the frontend. Edit it here to change where notification emails go.
+> **CONCIERGE_EMAIL** — never sent to the frontend. Change this to update where clinic notification emails go.
 
-> **OPEN_DAYS** uses 0=Sunday, 1=Monday … 6=Saturday. **CALENDAR_ID**: use `primary` for the clinic owner's main calendar. Any event on that calendar will block that time slot.
+> **ADMIN_TOKEN** — the password the clinic uses to log into the admin panel. Set something strong.
 
-## 4. Deploy as Web App
+> **OPEN_DAYS** uses 0=Sunday, 1=Monday … 6=Saturday.
+
+> **CALENDAR_ID** — set to the clinic's shared Google Calendar ID (not "primary"). Any event on that calendar blocks that time slot.
+
+---
+
+## 4. First-time Deploy as Web App
+
 1. Click **Deploy → New deployment**
 2. Type: **Web App**
 3. Execute as: **Me**
 4. Who has access: **Anyone**
-5. Click **Deploy**
-6. Copy the **Web App URL**
+5. Click **Deploy** → copy the **Web App URL**
 
-## 5. Update the website
-Replace the `scriptURL` value in `v1/index.html` with your new Web App URL.
+## 5. Set SCRIPT_URL in Cloudflare (one-time)
+
+The website never calls Apps Script directly — it goes through a Cloudflare proxy at `/api`.  
+You only need to set the real URL **once** in Cloudflare:
+
+1. Cloudflare Dashboard → **Workers & Pages** → `tomford-dental-website`
+2. **Settings → Environment Variables → Add variable**
+3. Name: `SCRIPT_URL`  
+   Value: *(paste the Web App URL from step 4)*
+4. Click **Save** — done. The frontend code never needs to change.
 
 ## 6. Grant Gmail permissions
-On first run, Apps Script will ask for Gmail permission. Click **Allow**.
+On first run, Apps Script will ask for Gmail/Calendar permission. Click **Allow**.
 
 ## 7. Test
 Submit a test booking on the website. You should:
-- See a new row in the `Appointments` tab
-- Receive a branded confirmation email (patient)
-- Receive a notification email (concierge)
+- Patient receives a **"Request Received"** email
+- Clinic receives a **"New Request"** notification email with a "Review in Admin" button
+- Log in at `tomforddental.com/admin` → booking appears as **Pending**
+- Click **Approve** → patient receives a **"Confirmed!"** email + calendar event created
+- Click **Decline** → patient receives a polite rejection email
+
+---
+
+## Redeploying Apps Script (after code changes)
+
+### ✅ The right way — URL stays the same forever:
+1. Apps Script Editor → **Deploy → Manage Deployments**
+2. Click the **pencil (Edit)** icon on your existing deployment
+3. Change **Version** to **"New version"**
+4. Click **Deploy** — same URL, updated code ✓
+
+### ❌ Wrong way — creates a new URL every time:
+> Deploy → **New deployment** — don't do this after the first time.  
+> If you do end up with a new URL, just update `SCRIPT_URL` in Cloudflare Environment Variables. No code changes needed.
+
+---
+
+## Admin Panel
+
+Live at: `https://tomforddental.com/admin`
+
+- Login with the `ADMIN_TOKEN` you set in the Config sheet
+- **Pending** tab — review and approve or decline requests
+- **All Bookings** tab — full history table
+- CRM features (Patients, Analytics, Reminders, Payments) — coming in a future update

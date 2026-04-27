@@ -586,7 +586,10 @@
 
 <script>
 // ── Config ─────────────────────────────────────────────────────────────────
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJOvWKTIUflbBXiYTxPdO89jaKLhgcknCHlfObt7NTdfqih1JCcfl0r1yXxUM8wvu3VQ/exec';
+// All requests go through our own /api proxy (Cloudflare Pages Function).
+// The real Apps Script URL lives in the SCRIPT_URL env var on Cloudflare —
+// update it there when redeploying Apps Script. Never touch this line again.
+const SCRIPT_URL = '/api';
 
 // ── State ──────────────────────────────────────────────────────────────────
 let token      = '';
