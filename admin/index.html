@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TomFord Dental — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange:     #f46709;
+      --orange-lt:  #fff3e8;
+      --orange-dk:  #e05800;
+      --black:      #111827;
+      --gray-dark:  #374151;
+      --gray:       #6b7280;
+      --gray-lt:    #9ca3af;
+      --border:     #f3f4f6;
+      --bg:         #f9fafb;
+      --white:      #ffffff;
+      --green:      #10b981;
+      --green-lt:   #ecfdf5;
+      --red:        #ef4444;
+      --red-lt:     #fef2f2;
+      --yellow:     #f59e0b;
+      --yellow-lt:  #fffbeb;
+      --radius:     12px;
+      --shadow:     0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--black);
+      min-height: 100vh;
+    }
+
+    /* ── Login screen ─────────────────────────────────────── */
+    #login-screen {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--white);
+      z-index: 999;
+      padding: 24px;
+    }
+    .login-card {
+      width: 100%; max-width: 400px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.08);
+    }
+    .login-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 32px;
+    }
+    .login-logo-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .login-logo-icon svg { width: 22px; height: 22px; fill: white; }
+    .login-logo-text h1 { font-size: 16px; font-weight: 700; color: var(--black); line-height: 1.2; }
+    .login-logo-text p  { font-size: 11px; color: var(--gray-lt); letter-spacing: .03em; }
+    .login-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .login-card p  { font-size: 13px; color: var(--gray); margin-bottom: 28px; }
+    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-dark); margin-bottom: 6px; letter-spacing: .02em; }
+    .field input {
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px; font-family: inherit;
+      outline: none; transition: border-color .15s;
+      background: var(--bg);
+    }
+    .field input:focus { border-color: var(--orange); background: var(--white); }
+    .btn-login {
+      width: 100%; margin-top: 20px;
+      padding: 13px;
+      background: var(--orange); color: white;
+      border: none; border-radius: 50px;
+      font-size: 14px; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: background .15s, transform .1s;
+    }
+    .btn-login:hover  { background: var(--orange-dk); }
+    .btn-login:active { transform: scale(.98); }
+    #login-error {
+      margin-top: 14px; padding: 10px 14px;
+      background: var(--red-lt); border-radius: 8px;
+      font-size: 13px; color: var(--red);
+      display: none;
+    }
+
+    /* ── App shell ────────────────────────────────────────── */
+    #app { display: none; }
+
+    /* ── Top nav ──────────────────────────────────────────── */
+    .topnav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex; align-items: center; gap: 24px;
+      height: 60px;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0;
+    }
+    .nav-brand-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-brand-icon svg { width: 18px; height: 18px; fill: white; }
+    .nav-brand-name { font-size: 14px; font-weight: 700; color: var(--black); }
+    .nav-brand-sub  { font-size: 11px; color: var(--gray-lt); }
+    .nav-sep { flex: 1; }
+    .nav-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--orange-lt); color: var(--orange);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 12px; font-weight: 600;
+    }
+    .nav-badge .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--orange); animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: .3; }
+    }
+    .btn-logout {
+      padding: 7px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      background: transparent; color: var(--gray);
+      font-size: 12px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all .15s;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── Sidebar ──────────────────────────────────────────── */
+    .layout { display: flex; min-height: calc(100vh - 60px); }
+    .sidebar {
+      width: 220px; flex-shrink: 0;
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      position: sticky; top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+    }
+    .sidebar-section { margin-bottom: 28px; }
+    .sidebar-label {
+      font-size: 10px; font-weight: 700; color: var(--gray-lt);
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: 0 8px; margin-bottom: 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px; border-radius: 9px;
+      font-size: 13px; font-weight: 500; color: var(--gray-dark);
+      cursor: pointer; transition: all .15s;
+      text-decoration: none; border: none; background: none;
+      width: 100%; text-align: left;
+      position: relative;
+    }
+    .nav-item:hover   { background: var(--bg); color: var(--black); }
+    .nav-item.active  { background: var(--orange-lt); color: var(--orange); font-weight: 600; }
+    .nav-item .icon   { width: 18px; height: 18px; flex-shrink: 0; opacity: .7; }
+    .nav-item.active .icon { opacity: 1; }
+    .nav-item .count  {
+      margin-left: auto;
+      background: var(--orange); color: white;
+      border-radius: 20px; padding: 1px 7px;
+      font-size: 11px; font-weight: 700;
+      display: none;
+    }
+    .nav-item .count.show { display: block; }
+    .nav-item.locked  { opacity: .45; cursor: not-allowed; }
+    .nav-item.locked:hover { background: none; color: var(--gray-dark); }
+    .lock-chip {
+      margin-left: auto;
+      font-size: 10px; font-weight: 600; color: var(--gray-lt);
+      letter-spacing: .02em;
+    }
+
+    /* ── Main content ─────────────────────────────────────── */
+    .main { flex: 1; padding: 28px 32px; max-width: 900px; }
+
+    /* ── Stat cards ───────────────────────────────────────── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .stat-label { font-size: 11px; font-weight: 600; color: var(--gray-lt); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 6px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--black); line-height: 1; }
+    .stat-card.orange .stat-value { color: var(--orange); }
+    .stat-card.green  .stat-value { color: var(--green);  }
+    .stat-card.red    .stat-value { color: var(--red);    }
+
+    /* ── Section header ───────────────────────────────────── */
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .section-title { font-size: 16px; font-weight: 700; }
+    .section-sub   { font-size: 13px; color: var(--gray); margin-left: auto; }
+    .pill {
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px; letter-spacing: .02em;
+    }
+    .pill.pending  { background: var(--yellow-lt); color: #92400e; }
+    .pill.approved { background: var(--green-lt);  color: #065f46; }
+    .pill.rejected { background: var(--red-lt);    color: #991b1b; }
+    .pill.legacy   { background: var(--bg);        color: var(--gray); }
+
+    /* ── Booking cards ────────────────────────────────────── */
+    .cards-list { display: flex; flex-direction: column; gap: 12px; }
+    .booking-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      transition: box-shadow .2s;
+      animation: fadeIn .25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .booking-card:hover { box-shadow: var(--shadow); }
+    .booking-card.highlight { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(244,103,9,.1); }
+    .card-top {
+      display: flex; align-items: flex-start; gap: 14px;
+      margin-bottom: 14px;
+    }
+    .card-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--orange-lt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; color: var(--orange);
+      flex-shrink: 0;
+    }
+    .card-info { flex: 1; }
+    .card-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+    .card-service {
+      display: inline-block;
+      background: var(--orange-lt); color: var(--orange);
+      border-radius: 20px; padding: 2px 10px;
+      font-size: 11px; font-weight: 700;
+    }
+    .card-meta {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .card-meta-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--gray-dark); }
+    .card-meta-item svg { width: 14px; height: 14px; color: var(--gray-lt); flex-shrink: 0; }
+    .card-contacts {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .card-contact { font-size: 12px; color: var(--gray); display: flex; align-items: center; gap: 4px; }
+    .card-contact a { color: var(--orange); text-decoration: none; }
+    .card-contact a:hover { text-decoration: underline; }
+    .card-notes {
+      background: var(--bg); border-radius: 8px;
+      padding: 10px 14px; margin-bottom: 14px;
+      font-size: 12px; color: var(--gray-dark); line-height: 1.6;
+    }
+    .card-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .btn-approve, .btn-reject {
+      padding: 9px 22px; border-radius: 50px;
+      font-size: 13px; font-weight: 700; font-family: inherit;
+      cursor: pointer; border: none;
+      transition: all .15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-approve { background: var(--green); color: white; }
+    .btn-approve:hover { background: #059669; }
+    .btn-reject  { background: transparent; color: var(--red); border: 1.5px solid var(--red); }
+    .btn-reject:hover { background: var(--red-lt); }
+    .btn-approve:disabled, .btn-reject:disabled {
+      opacity: .5; cursor: not-allowed;
+    }
+    .card-id { font-size: 11px; color: var(--gray-lt); margin-left: auto; }
+
+    /* ── Reject modal ─────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.35);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 500; padding: 24px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--white); border-radius: 16px;
+      padding: 28px; width: 100%; max-width: 440px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.15);
+      transform: translateY(12px); transition: transform .2s;
+    }
+    .modal-overlay.open .modal { transform: none; }
+    .modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .modal p  { font-size: 13px; color: var(--gray); margin-bottom: 18px; }
+    .modal textarea {
+      width: 100%; height: 90px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; font-size: 13px; font-family: inherit;
+      resize: none; outline: none; transition: border-color .15s;
+      background: var(--bg);
+    }
+    .modal textarea:focus { border-color: var(--orange); background: white; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+    .btn-cancel {
+      padding: 9px 20px; border-radius: 50px;
+      background: transparent; border: 1.5px solid var(--border);
+      color: var(--gray); font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .btn-cancel:hover { border-color: var(--gray); }
+    .btn-confirm-reject {
+      padding: 9px 20px; border-radius: 50px;
+      background: var(--red); color: white;
+      border: none; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+    .btn-confirm-reject:hover { background: #dc2626; }
+
+    /* ── Table view (All Bookings) ────────────────────────── */
+    .table-wrap {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .table-wrap table { width: 100%; border-collapse: collapse; }
+    .table-wrap th {
+      padding: 11px 16px; text-align: left;
+      font-size: 11px; font-weight: 700; color: var(--gray-lt);
+      letter-spacing: .05em; text-transform: uppercase;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .table-wrap td {
+      padding: 12px 16px; font-size: 13px; color: var(--gray-dark);
+      border-bottom: 1px solid var(--border);
+    }
+    .table-wrap tr:last-child td { border-bottom: none; }
+    .table-wrap tr:hover td { background: var(--bg); }
+    .td-name { font-weight: 600; color: var(--black); }
+
+    /* ── Coming soon panels ───────────────────────────────── */
+    .coming-soon {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 48px 32px; text-align: center;
+    }
+    .coming-soon-icon { font-size: 36px; margin-bottom: 14px; }
+    .coming-soon h3   { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .coming-soon p    { font-size: 13px; color: var(--gray); max-width: 320px; margin: 0 auto; line-height: 1.7; }
+    .coming-badge {
+      display: inline-block; margin-top: 16px;
+      background: var(--orange-lt); color: var(--orange);
+      border-radius: 20px; padding: 5px 16px;
+      font-size: 12px; font-weight: 700;
+    }
+
+    /* ── Empty state ──────────────────────────────────────── */
+    .empty-state {
+      text-align: center; padding: 56px 24px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .empty-state-icon { font-size: 40px; margin-bottom: 14px; }
+    .empty-state h3   { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .empty-state p    { font-size: 13px; color: var(--gray); }
+
+    /* ── Loading ──────────────────────────────────────────── */
+    .loader {
+      display: flex; justify-content: center;
+      padding: 48px;
+    }
+    .spinner {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--orange);
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--black); color: white;
+      padding: 12px 22px; border-radius: 50px;
+      font-size: 13px; font-weight: 600;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s, transform .2s;
+      z-index: 9999; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.success { background: var(--green); }
+    #toast.error   { background: var(--red);   }
+
+    /* ── Responsive ───────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .sidebar   { display: none; }
+      .topnav    { padding: 0 16px; }
+      .main      { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Login ──────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z"/></svg>
+      </div>
+      <div class="login-logo-text">
+        <h1>TomFord Dental</h1>
+        <p>Admin Panel</p>
+      </div>
+    </div>
+    <h2>Welcome back 👋</h2>
+    <p>Enter your admin password to continue.</p>
+    <div class="field">
+      <label>Admin Password</label>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="current-password" />
+    </div>
+    <button class="btn-login" id="login-btn">Sign In</button>
+    <div id="login-error">Incorrect password. Please try again.</div>
+  </div>
+</div>
+
+<!-- ── Reject modal ────────────────────────────────────────── -->
+<div class="modal-overlay" id="reject-modal">
+  <div class="modal">
+    <h3>Decline Request</h3>
+    <p>Optionally add a note for the patient explaining why their slot couldn't be confirmed.</p>
+    <textarea id="reject-reason" placeholder="e.g. The dentist is not available on this day. Please call us to reschedule."></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="btn-confirm-reject" id="modal-confirm">Decline Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── App ─────────────────────────────────────────────────── -->
+<div id="app">
+  <!-- Top nav -->
+  <nav class="topnav">
+    <a class="nav-brand" href="#">
+      <div class="nav-brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z"/></svg>
+      </div>
+      <div>
+        <div class="nav-brand-name">TomFord Dental</div>
+        <div class="nav-brand-sub">Admin Panel</div>
+      </div>
+    </a>
+    <div class="nav-sep"></div>
+    <div class="nav-badge" id="pending-badge" style="display:none;">
+      <span class="dot"></span>
+      <span id="pending-badge-count">0</span> pending
+    </div>
+    <button class="btn-logout" id="logout-btn">Sign out</button>
+  </nav>
+
+  <!-- Layout -->
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Bookings</div>
+        <button class="nav-item active" data-tab="pending">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Pending
+          <span class="count" id="nav-pending-count">0</span>
+        </button>
+        <button class="nav-item" data-tab="all">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          All Bookings
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">CRM — Coming Soon</div>
+        <button class="nav-item locked" disabled>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Patient Profiles
+          <span class="lock-chip">🔒</span>
+        </button>
+        <button class="nav-item locked" disabled>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Analytics
+          <span class="lock-chip">🔒</span>
+        </button>
+        <button class="nav-item locked" disabled>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+          Follow-up Reminders
+          <span class="lock-chip">🔒</span>
+        </button>
+        <button class="nav-item locked" disabled>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Treatment Notes
+          <span class="lock-chip">🔒</span>
+        </button>
+        <button class="nav-item locked" disabled>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Payments
+          <span class="lock-chip">🔒</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <!-- Stats -->
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value" id="stat-total">—</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value" id="stat-pending">—</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Approved</div>
+          <div class="stat-value" id="stat-approved">—</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Declined</div>
+          <div class="stat-value" id="stat-rejected">—</div>
+        </div>
+      </div>
+
+      <!-- Tab: Pending -->
+      <div id="tab-pending">
+        <div class="section-header">
+          <div class="section-title">Pending Requests</div>
+          <div class="section-sub" id="pending-sub"></div>
+        </div>
+        <div id="pending-list"></div>
+      </div>
+
+      <!-- Tab: All Bookings -->
+      <div id="tab-all" style="display:none;">
+        <div class="section-header">
+          <div class="section-title">All Bookings</div>
+          <div class="section-sub" id="all-sub"></div>
+        </div>
+        <div id="all-list"></div>
+      </div>
+
+      <!-- Tab: Coming soon panels -->
+      <div id="tab-locked" style="display:none;">
+        <div class="coming-soon">
+          <div class="coming-soon-icon">🚀</div>
+          <h3>Coming Soon</h3>
+          <p>This feature is part of the TomFord Dental CRM — currently in development. Stay tuned!</p>
+          <span class="coming-badge">Upgrading soon</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Config ─────────────────────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJOvWKTIUflbBXiYTxPdO89jaKLhgcknCHlfObt7NTdfqih1JCcfl0r1yXxUM8wvu3VQ/exec';
+
+// ── State ──────────────────────────────────────────────────────────────────
+let token      = '';
+let allData    = [];
+let rejectId   = null;
+let highlightId = new URLSearchParams(location.search).get('highlight');
+
+// ── Auth ───────────────────────────────────────────────────────────────────
+const loginScreen  = document.getElementById('login-screen');
+const app          = document.getElementById('app');
+const passwordInput= document.getElementById('password-input');
+const loginBtn     = document.getElementById('login-btn');
+const loginError   = document.getElementById('login-error');
+const logoutBtn    = document.getElementById('logout-btn');
+
+function tryLogin() {
+  const pwd = passwordInput.value.trim();
+  if (!pwd) return;
+  loginBtn.textContent = 'Signing in…';
+  loginBtn.disabled = true;
+
+  const body = new FormData();
+  body.append('adminAction', 'approve'); // test with a fake id to check token
+  body.append('token', pwd);
+  body.append('id', '__auth_check__');
+
+  fetch(SCRIPT_URL, { method: 'POST', body })
+    .then(r => r.json())
+    .then(d => {
+      if (d.error === 'Unauthorized') {
+        loginError.style.display = 'block';
+        loginBtn.textContent = 'Sign In';
+        loginBtn.disabled = false;
+      } else {
+        // Token is valid (any response other than Unauthorized means auth passed)
+        token = pwd;
+        sessionStorage.setItem('tfd_token', token);
+        showApp();
+      }
+    })
+    .catch(() => {
+      loginError.textContent = 'Connection error. Please try again.';
+      loginError.style.display = 'block';
+      loginBtn.textContent = 'Sign In';
+      loginBtn.disabled = false;
+    });
+}
+
+loginBtn.addEventListener('click', tryLogin);
+passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+logoutBtn.addEventListener('click', () => {
+  sessionStorage.removeItem('tfd_token');
+  location.reload();
+});
+
+function showApp() {
+  loginScreen.style.display = 'none';
+  app.style.display = 'block';
+  loadData();
+}
+
+// Auto-login from session
+const savedToken = sessionStorage.getItem('tfd_token');
+if (savedToken) { token = savedToken; showApp(); }
+
+// ── Data ───────────────────────────────────────────────────────────────────
+function loadData() {
+  showLoader('pending-list');
+  showLoader('all-list');
+
+  fetch(`${SCRIPT_URL}?action=getAll&token=${encodeURIComponent(token)}`)
+    .then(r => r.json())
+    .then(d => {
+      if (d.error === 'Unauthorized') {
+        sessionStorage.removeItem('tfd_token');
+        location.reload(); return;
+      }
+      allData = d.bookings || [];
+      updateStats();
+      renderPending();
+      renderAll();
+    })
+    .catch(() => {
+      document.getElementById('pending-list').innerHTML = '<p style="color:#ef4444;font-size:13px;">Failed to load. Check your connection.</p>';
+    });
+}
+
+function updateStats() {
+  const total    = allData.length;
+  const pending  = allData.filter(b => b.status === 'Pending').length;
+  const approved = allData.filter(b => b.status === 'Approved').length;
+  const rejected = allData.filter(b => b.status === 'Rejected').length;
+
+  document.getElementById('stat-total').textContent    = total;
+  document.getElementById('stat-pending').textContent  = pending;
+  document.getElementById('stat-approved').textContent = approved;
+  document.getElementById('stat-rejected').textContent = rejected;
+
+  const badge = document.getElementById('pending-badge');
+  if (pending > 0) {
+    badge.style.display = 'inline-flex';
+    document.getElementById('pending-badge-count').textContent = pending;
+  } else {
+    badge.style.display = 'none';
+  }
+
+  const navCount = document.getElementById('nav-pending-count');
+  navCount.textContent = pending;
+  navCount.classList.toggle('show', pending > 0);
+}
+
+// ── Render: Pending ────────────────────────────────────────────────────────
+function renderPending() {
+  const list    = allData.filter(b => b.status === 'Pending');
+  const el      = document.getElementById('pending-list');
+  const sub     = document.getElementById('pending-sub');
+  sub.textContent = list.length + ' request' + (list.length !== 1 ? 's' : '') + ' awaiting review';
+
+  if (list.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">✅</div>
+        <h3>All clear!</h3>
+        <p>No pending requests right now. New bookings will appear here.</p>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = '<div class="cards-list">' + list.map(b => bookingCard(b, true)).join('') + '</div>';
+  attachCardActions();
+
+  // Highlight if linked from email
+  if (highlightId) {
+    const el = document.getElementById('card-' + highlightId);
+    if (el) { el.classList.add('highlight'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }
+}
+
+// ── Render: All ────────────────────────────────────────────────────────────
+function renderAll() {
+  const el  = document.getElementById('all-list');
+  const sub = document.getElementById('all-sub');
+  sub.textContent = allData.length + ' total booking' + (allData.length !== 1 ? 's' : '');
+
+  if (allData.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📋</div>
+        <h3>No bookings yet</h3>
+        <p>When patients submit requests, they'll show up here.</p>
+      </div>`;
+    return;
+  }
+
+  const rows = allData.map(b => {
+    const statusPill = statusBadge(b.status);
+    return `
+      <tr>
+        <td class="td-name">${esc(b.fullName)}</td>
+        <td>${esc(b.service)}</td>
+        <td>${formatDate(b.date)}</td>
+        <td>${formatTime(b.time)}</td>
+        <td><a href="mailto:${esc(b.email)}" style="color:var(--orange);text-decoration:none;">${esc(b.email)}</a></td>
+        <td>${esc(b.phone)}</td>
+        <td>${statusPill}</td>
+      </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th><th>Service</th><th>Date</th><th>Time</th>
+            <th>Email</th><th>Phone</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ── Card template ──────────────────────────────────────────────────────────
+function bookingCard(b, showActions) {
+  const initials = (b.fullName || '?').split(' ').map(w => w[0]).join('').substr(0, 2).toUpperCase();
+  const notes    = b.notes ? `<div class="card-notes">📝 ${esc(b.notes)}</div>` : '';
+  const actions  = showActions && b.status === 'Pending' ? `
+    <div class="card-actions">
+      <button class="btn-approve" data-id="${esc(b.id)}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Approve
+      </button>
+      <button class="btn-reject" data-id="${esc(b.id)}" data-name="${esc(b.fullName)}">
+        Decline
+      </button>
+      <span class="card-id">${esc(b.id)}</span>
+    </div>` : `<div class="card-actions">${statusBadge(b.status)}<span class="card-id">${esc(b.id)}</span></div>`;
+
+  return `
+    <div class="booking-card" id="card-${esc(b.id)}">
+      <div class="card-top">
+        <div class="card-avatar">${initials}</div>
+        <div class="card-info">
+          <div class="card-name">${esc(b.fullName)}</div>
+          <span class="card-service">${esc(b.service)}</span>
+        </div>
+        ${showActions && b.status !== 'Pending' ? statusBadge(b.status) : ''}
+      </div>
+      <div class="card-meta">
+        <div class="card-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          ${formatDate(b.date)}
+        </div>
+        <div class="card-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${formatTime(b.time)}
+        </div>
+      </div>
+      <div class="card-contacts">
+        <div class="card-contact">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.62A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.17 6.17l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <a href="tel:${esc(b.phone)}">${esc(b.phone)}</a>
+        </div>
+        <div class="card-contact">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <a href="mailto:${esc(b.email)}">${esc(b.email)}</a>
+        </div>
+      </div>
+      ${notes}
+      ${actions}
+    </div>`;
+}
+
+function statusBadge(status) {
+  const map = {
+    Pending:  ['pending',  '⏳ Pending'],
+    Approved: ['approved', '✅ Approved'],
+    Rejected: ['rejected', '❌ Declined'],
+  };
+  const [cls, label] = map[status] || ['legacy', status || 'Approved'];
+  return `<span class="pill ${cls}">${label}</span>`;
+}
+
+// ── Card actions ───────────────────────────────────────────────────────────
+function attachCardActions() {
+  document.querySelectorAll('.btn-approve').forEach(btn => {
+    btn.addEventListener('click', () => handleApprove(btn.dataset.id, btn));
+  });
+  document.querySelectorAll('.btn-reject').forEach(btn => {
+    btn.addEventListener('click', () => openRejectModal(btn.dataset.id, btn.dataset.name));
+  });
+}
+
+function handleApprove(id, btn) {
+  if (!confirm('Approve this booking? The patient will receive a confirmation email.')) return;
+  btn.disabled = true;
+  btn.textContent = 'Approving…';
+  const sibling = btn.parentElement.querySelector('.btn-reject');
+  if (sibling) sibling.disabled = true;
+
+  const body = new FormData();
+  body.append('adminAction', 'approve');
+  body.append('token', token);
+  body.append('id', id);
+
+  fetch(SCRIPT_URL, { method: 'POST', body })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        showToast('Booking approved! Confirmation email sent.', 'success');
+        setTimeout(() => loadData(), 800);
+      } else {
+        showToast(d.error || 'Something went wrong.', 'error');
+        btn.disabled = false; btn.textContent = 'Approve';
+        if (sibling) sibling.disabled = false;
+      }
+    })
+    .catch(() => {
+      showToast('Connection error. Please try again.', 'error');
+      btn.disabled = false; btn.textContent = 'Approve';
+      if (sibling) sibling.disabled = false;
+    });
+}
+
+// ── Reject modal ───────────────────────────────────────────────────────────
+const rejectModal   = document.getElementById('reject-modal');
+const rejectReason  = document.getElementById('reject-reason');
+const modalCancel   = document.getElementById('modal-cancel');
+const modalConfirm  = document.getElementById('modal-confirm');
+
+function openRejectModal(id, name) {
+  rejectId = id;
+  rejectReason.value = '';
+  rejectModal.classList.add('open');
+  setTimeout(() => rejectReason.focus(), 200);
+}
+
+modalCancel.addEventListener('click', () => {
+  rejectModal.classList.remove('open');
+  rejectId = null;
+});
+
+rejectModal.addEventListener('click', e => {
+  if (e.target === rejectModal) { rejectModal.classList.remove('open'); rejectId = null; }
+});
+
+modalConfirm.addEventListener('click', () => {
+  if (!rejectId) return;
+  modalConfirm.textContent = 'Declining…';
+  modalConfirm.disabled = true;
+
+  const body = new FormData();
+  body.append('adminAction', 'reject');
+  body.append('token', token);
+  body.append('id', rejectId);
+  body.append('reason', rejectReason.value.trim());
+
+  fetch(SCRIPT_URL, { method: 'POST', body })
+    .then(r => r.json())
+    .then(d => {
+      rejectModal.classList.remove('open');
+      modalConfirm.textContent = 'Decline Booking';
+      modalConfirm.disabled = false;
+      if (d.success) {
+        showToast('Booking declined. Patient has been notified.', 'success');
+        setTimeout(() => loadData(), 800);
+      } else {
+        showToast(d.error || 'Something went wrong.', 'error');
+      }
+      rejectId = null;
+    })
+    .catch(() => {
+      showToast('Connection error.', 'error');
+      modalConfirm.textContent = 'Decline Booking';
+      modalConfirm.disabled = false;
+    });
+});
+
+// ── Tab navigation ─────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.classList.contains('locked')) return;
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.getElementById('tab-pending').style.display = 'none';
+    document.getElementById('tab-all').style.display     = 'none';
+    document.getElementById('tab-locked').style.display  = 'none';
+
+    const tab = btn.dataset.tab;
+    if      (tab === 'pending') document.getElementById('tab-pending').style.display = 'block';
+    else if (tab === 'all')     document.getElementById('tab-all').style.display     = 'block';
+    else                        document.getElementById('tab-locked').style.display  = 'block';
+  });
+});
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function showLoader(elId) {
+  document.getElementById(elId).innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+}
+
+function esc(s) {
+  return (s || '').toString()
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  try {
+    const [y,m,day] = d.split('-').map(Number);
+    const dt = new Date(y, m-1, day);
+    return dt.toLocaleDateString('en-PH', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+  } catch(e) { return d; }
+}
+
+function formatTime(t) {
+  if (!t) return '—';
+  try {
+    const [h, m] = t.split(':').map(Number);
+    return (h%12||12) + ':' + String(m).padStart(2,'0') + ' ' + (h>=12?'PM':'AM');
+  } catch(e) { return t; }
+}
+
+let toastTimer;
+function showToast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 3500);
+}
+</script>
+</body>
+</html>
