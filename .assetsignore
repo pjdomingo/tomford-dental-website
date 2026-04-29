@@ -2,3 +2,6 @@ apps-script/
 .github/
 .DS_Store
 README.md
+wrangler.jsonc
+.gitignore
+.assetsignore
