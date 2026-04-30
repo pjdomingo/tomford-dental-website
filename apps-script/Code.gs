@@ -492,7 +492,7 @@ function sendPatientPendingEmail(data, config) {
     +'</td></tr>'
     // Body
     +'<tr><td style="padding:32px 36px 24px;">'
-    +'<p style="margin:0 0 6px;color:#111827;font-size:16px;font-weight:700;">Hi '+( data.fullName || 'there')+'! 👋</p>'
+    +'<p style="margin:0 0 6px;color:#111827;font-size:16px;font-weight:700;">Hi '+( data.fullName || 'there')+'!</p>'
     +'<p style="margin:0 0 24px;color:#4b5563;font-size:14px;line-height:1.7;">We\'ve received your appointment request. Our team will review it and confirm your slot shortly — usually within a few hours during clinic hours.</p>'
     // Details card
     +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8f3;border-radius:12px;border-left:4px solid #f46709;margin-bottom:24px;">'
@@ -507,7 +507,7 @@ function sendPatientPendingEmail(data, config) {
     // Status pill
     +'<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">'
     +'<tr><td style="background:#fff3cd;border-radius:10px;padding:14px 18px;">'
-    +'<p style="margin:0;color:#92400e;font-size:13px;"><strong>⏳ Status: Pending Review</strong></p>'
+    +'<p style="margin:0;color:#92400e;font-size:13px;"><strong>Status: Pending Review</strong></p>'
     +'<p style="margin:4px 0 0;color:#78350f;font-size:12px;line-height:1.6;">This is not yet a confirmed appointment. We\'ll send you another email once confirmed.</p>'
     +'</td></tr></table>'
     +'<p style="margin:0;color:#6b7280;font-size:13px;">Questions? Call us at <strong style="color:#111827;">'+phone+'</strong>'+(email?' or email <a href="mailto:'+email+'" style="color:#f46709;text-decoration:none;">'+email+'</a>':'')+'</p>'
@@ -537,7 +537,7 @@ function sendClinicRequestEmail(data, config, bookingId) {
   var adminUrl   = (config.ADMIN_URL     || 'https://tomforddental.com/admin').replace(/\/$/, '');
   var dd         = formatDisplayDate(data.date);
   var dt         = formatDisplayTime(data.time);
-  var subj       = '🔔 New Request: ' + (data.fullName||'?') + ' · ' + (data.service||'—') + ' · ' + dd;
+  var subj       = 'New Request: ' + (data.fullName||'?') + ' - ' + (data.service||'-') + ' - ' + dd;
   var reviewLink = adminUrl + '?highlight=' + encodeURIComponent(bookingId);
 
   var html =
@@ -597,10 +597,10 @@ function sendPatientApprovedEmail(data, config, calLink) {
   var tag        = config.BOOKING_TAGLINE|| 'where every tooth matters.';
   var dd         = formatDisplayDate(data.date);
   var dt         = formatDisplayTime(data.time);
-  var subj       = '✅ Confirmed! Your ' + clinicName + ' Appointment — ' + dd;
+  var subj       = 'Confirmed: Your ' + clinicName + ' Appointment - ' + dd;
 
   var calBtn = calLink
-    ? '<tr><td align="center" style="padding-bottom:24px;"><a href="'+calLink+'" style="display:inline-block;background:#f46709;color:#fff;text-decoration:none;padding:13px 30px;border-radius:50px;font-size:14px;font-weight:600;font-family:Arial,sans-serif;">📅 Add to Google Calendar</a></td></tr>'
+    ? '<tr><td align="center" style="padding-bottom:24px;"><a href="'+calLink+'" style="display:inline-block;background:#f46709;color:#fff;text-decoration:none;padding:13px 30px;border-radius:50px;font-size:14px;font-weight:600;font-family:Arial,sans-serif;">Add to Google Calendar</a></td></tr>'
     : '';
 
   var html =
@@ -613,7 +613,7 @@ function sendPatientApprovedEmail(data, config, calLink) {
     +'<p style="margin:0;color:rgba(255,255,255,.8);font-size:12px;font-style:italic;font-family:Georgia,serif;">'+tag+'</p>'
     +'</td></tr>'
     +'<tr><td style="padding:32px 36px 24px;">'
-    +'<p style="margin:0 0 6px;color:#111827;font-size:16px;font-weight:700;">You\'re all set, '+(data.fullName||'there')+'! 🎉</p>'
+    +'<p style="margin:0 0 6px;color:#111827;font-size:16px;font-weight:700;">You\'re all set, '+(data.fullName||'there')+'!</p>'
     +'<p style="margin:0 0 24px;color:#4b5563;font-size:14px;line-height:1.7;">Your appointment has been confirmed. We look forward to seeing you!</p>'
     +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8f3;border-radius:12px;border-left:4px solid #f46709;margin-bottom:24px;">'
     +'<tr><td style="padding:20px 24px;">'
