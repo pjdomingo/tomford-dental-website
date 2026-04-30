@@ -315,6 +315,15 @@
         <li>The slot is freed up — another patient can book it.</li>
         <li>The booking row stays in the Sheet with status <span class="pill declined">Declined</span> for your records.</li>
       </ul>
+
+      <h3>What happens if you edit a booking</h3>
+      <ul>
+        <li>You can change <strong>any detail</strong> — name, email, phone, service, date, time, or notes — on both Pending and Approved bookings.</li>
+        <li>You can include an optional <strong>message to the patient</strong> explaining why (e.g. "Dr. Tom can only see you on Wednesday — moved you to Wed 2 PM").</li>
+        <li>The patient gets a "Booking Updated" email showing what changed (old → new) with your message, asking them to <strong>reply or call to confirm</strong> the new slot.</li>
+        <li>If the booking was already Approved, the <strong>Google Calendar event automatically moves</strong> to the new date/time.</li>
+        <li>The Sheet row updates in place — same Booking ID, same status.</li>
+      </ul>
     </section>
 
     <!-- How to test -->
@@ -346,7 +355,19 @@
         <li>Back in the Sheet — confirm the status changed to "Approved".</li>
       </ol>
 
-      <h3>Step 4 — Try declining (optional, on a different test booking)</h3>
+      <h3>Step 4 — Try editing the approved booking</h3>
+      <ol>
+        <li>In the Admin Panel, find the booking you just approved (in the <strong>All Bookings</strong> tab or in <strong>Calendar View</strong>).</li>
+        <li>Click <strong>Edit</strong>.</li>
+        <li>Change the time to something different (e.g. move it 1 hour later).</li>
+        <li>In the "Message to patient" field, type something like "Just testing — please ignore."</li>
+        <li>Click <strong>Save & Notify Patient</strong>.</li>
+        <li>Check the patient inbox — you should get a "Booking Updated" email showing old time → new time.</li>
+        <li>Open Google Calendar — the event should have automatically moved to the new time.</li>
+        <li>Check the Sheet — the row should show the updated time, with the same Booking ID and status.</li>
+      </ol>
+
+      <h3>Step 5 — Try declining (optional, on a different test booking)</h3>
       <ol>
         <li>Make another fake booking.</li>
         <li>In the Admin Panel, click <strong>Decline</strong>.</li>
@@ -366,13 +387,17 @@
       <p>The Admin Panel is where you'll spend most of your time. Here's what each section does.</p>
 
       <h3>📥 Pending Requests</h3>
-      <p>New bookings that haven't been reviewed yet. You'll see the patient's name, contact info, the service they want, and the date/time. Approve or decline from here. The number badge in the sidebar shows you how many are waiting.</p>
+      <p>New bookings that haven't been reviewed yet. You'll see the patient's name, contact info, the service they want, and the date/time. Approve, decline, or edit from here. The number badge in the sidebar shows you how many are waiting.</p>
 
       <h3>📅 Calendar View</h3>
-      <p>A monthly overview of all your appointments — both pending and approved. Click any event to jump to it, or click the "Open Google Calendar" button to view it in your full Google Calendar. <em>(New)</em></p>
+      <p>A monthly overview of all your appointments — both pending and approved. Click any event to jump to it, or click the "Open Google Calendar" button to view it in your full Google Calendar.</p>
 
       <h3>📋 All Bookings</h3>
-      <p>The full history — pending, approved, declined. Useful if a patient calls and you need to look up their appointment.</p>
+      <p>The full history — pending, approved, declined. Useful if a patient calls and you need to look up their appointment. Each row has an <strong>Edit</strong> button so you can update any booking even after it's been approved.</p>
+
+      <h3>✏️ Edit any booking</h3>
+      <p>Click <strong>Edit</strong> on any booking (in Pending or All Bookings) to change the patient name, email, phone, service, date, time, or notes. You can include an optional message to the patient explaining the change. When you save, the patient gets an email with the old → new details and is asked to reply or call to confirm.</p>
+      <p>If the booking was already Approved, the Google Calendar event is automatically moved to the new date/time — no extra step.</p>
 
       <h3>🔢 Stats at the top</h3>
       <p>Quick counts: how many total bookings, how many pending, how many approved, how many declined.</p>
@@ -427,12 +452,17 @@
 
       <details>
         <summary>Can I edit a booking after approving it?</summary>
-        <p>Not yet — that feature is coming soon. For now, if a patient needs to reschedule, decline the original booking with a friendly note asking them to rebook for a new slot.</p>
+        <p>Yes! Click the <strong>Edit</strong> button on any booking — Pending or Approved. You can change the patient's name, email, phone, service, date, time, or notes. Add an optional message to the patient (e.g. "We've moved you to 3 PM because Dr. Tom is unavailable at 2 PM"). When you save, the patient gets an email with the old → new details and is asked to reply or call to confirm. If the booking was already Approved, the Google Calendar event moves automatically.</p>
+      </details>
+
+      <details>
+        <summary>What if a patient asks to reschedule?</summary>
+        <p>Click <strong>Edit</strong> on their booking, change the date/time to whatever works, optionally write a short note like "Confirmed — see you Wednesday instead." Save. They get the updated email with the new details, and the calendar event moves on its own.</p>
       </details>
 
       <details>
         <summary>What if I approve by mistake?</summary>
-        <p>The calendar event will be created and the confirmation email sent. The fastest fix is to call the patient directly to explain. Then in Google Calendar, delete the event manually. (We'll add an "undo" feature in a future update.)</p>
+        <p>Two options. <strong>(1)</strong> Click <strong>Edit</strong> on the booking and change the date or service to something correct, and the patient will be re-notified. <strong>(2)</strong> If the booking shouldn't exist at all, you can decline it from the Pending tab — but if it's already Approved, your fastest path is to call the patient to explain and then manually delete the event in Google Calendar.</p>
       </details>
 
       <details>
