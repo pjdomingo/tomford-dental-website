@@ -335,6 +335,53 @@
       cursor: pointer; font-family: inherit;
     }
     .btn-confirm-reject:hover { background: #dc2626; }
+    .btn-confirm-edit {
+      padding: 9px 20px; border-radius: 50px;
+      background: var(--orange); color: white;
+      border: none; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+    .btn-confirm-edit:hover { background: var(--orange-dk); }
+    .btn-confirm-edit:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-edit {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--gray-dark);
+      padding: 6px 12px;
+      border-radius: 50px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: inherit;
+      transition: all .15s;
+    }
+    .btn-edit:hover { border-color: var(--orange); color: var(--orange); }
+    .btn-edit svg { width: 12px; height: 12px; }
+
+    /* Edit form */
+    .edit-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 540px) { .edit-grid { grid-template-columns: 1fr; } }
+    .edit-field {
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .edit-label {
+      font-size: 11px; font-weight: 700; color: var(--gray);
+      letter-spacing: .05em; text-transform: uppercase;
+    }
+    .edit-field input,
+    .edit-field textarea {
+      width: 100%;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 9px 12px; font-size: 13px; font-family: inherit;
+      background: var(--bg); color: var(--black);
+      outline: none; transition: border-color .15s;
+      resize: vertical;
+    }
+    .edit-field input:focus,
+    .edit-field textarea:focus { border-color: var(--orange); background: white; }
 
     /* ── Table view (All Bookings) ────────────────────────── */
     .table-wrap {
@@ -572,6 +619,55 @@
     <div class="day-detail-list" id="day-detail-list"></div>
     <div class="modal-actions">
       <button class="btn-cancel" id="day-detail-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit booking modal ──────────────────────────────────── -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal" style="max-width: 520px;">
+    <h3>Edit Booking</h3>
+    <p>Update the booking details. The patient will be emailed and asked to confirm the change.</p>
+    <form id="edit-form" class="edit-form">
+      <input type="hidden" id="edit-id" />
+      <div class="edit-grid">
+        <label class="edit-field">
+          <span class="edit-label">Full Name</span>
+          <input type="text" id="edit-fullName" required />
+        </label>
+        <label class="edit-field">
+          <span class="edit-label">Service</span>
+          <input type="text" id="edit-service" required />
+        </label>
+        <label class="edit-field">
+          <span class="edit-label">Email</span>
+          <input type="email" id="edit-email" required />
+        </label>
+        <label class="edit-field">
+          <span class="edit-label">Phone</span>
+          <input type="tel" id="edit-phone" required />
+        </label>
+        <label class="edit-field">
+          <span class="edit-label">Date</span>
+          <input type="date" id="edit-date" required />
+        </label>
+        <label class="edit-field">
+          <span class="edit-label">Time</span>
+          <input type="time" id="edit-time" step="900" required />
+        </label>
+      </div>
+      <label class="edit-field" style="margin-top:12px;">
+        <span class="edit-label">Notes (internal)</span>
+        <textarea id="edit-notes" rows="2" style="height:auto;"></textarea>
+      </label>
+      <label class="edit-field" style="margin-top:12px;">
+        <span class="edit-label">Message to patient (optional)</span>
+        <textarea id="edit-message" rows="3" style="height:auto;" placeholder="e.g. Dr. Tom is unavailable on the original time, so we moved you to the next available slot. Let us know if this works."></textarea>
+      </label>
+    </form>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="edit-cancel">Cancel</button>
+      <button class="btn-confirm-edit" id="edit-save">Save & Notify Patient</button>
     </div>
   </div>
 </div>
@@ -913,6 +1009,7 @@ function renderAll() {
         <td><a href="mailto:${esc(b.email)}" style="color:var(--orange);text-decoration:none;">${esc(b.email)}</a></td>
         <td>${esc(b.phone)}</td>
         <td>${statusPill}</td>
+        <td><button class="btn-edit" data-id="${esc(b.id)}" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</button></td>
       </tr>`;
   }).join('');
 
@@ -922,18 +1019,27 @@ function renderAll() {
         <thead>
           <tr>
             <th>Patient</th><th>Service</th><th>Date</th><th>Time</th>
-            <th>Email</th><th>Phone</th><th>Status</th>
+            <th>Email</th><th>Phone</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
+
+  // Wire edit buttons in the table
+  el.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+  });
 }
 
 // ── Card template ──────────────────────────────────────────────────────────
 function bookingCard(b, showActions) {
   const initials = (b.fullName || '?').split(' ').map(w => w[0]).join('').substr(0, 2).toUpperCase();
   const notes    = b.notes ? `<div class="card-notes">📝 ${esc(b.notes)}</div>` : '';
+  const editBtn = `<button class="btn-edit" data-id="${esc(b.id)}" title="Edit this booking">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Edit
+  </button>`;
   const actions  = showActions && b.status === 'Pending' ? `
     <div class="card-actions">
       <button class="btn-approve" data-id="${esc(b.id)}">
@@ -943,8 +1049,9 @@ function bookingCard(b, showActions) {
       <button class="btn-reject" data-id="${esc(b.id)}" data-name="${esc(b.fullName)}">
         Decline
       </button>
+      ${editBtn}
       <span class="card-id">${esc(b.id)}</span>
-    </div>` : `<div class="card-actions">${statusBadge(b.status)}<span class="card-id">${esc(b.id)}</span></div>`;
+    </div>` : `<div class="card-actions">${statusBadge(b.status)}${editBtn}<span class="card-id">${esc(b.id)}</span></div>`;
 
   return `
     <div class="booking-card" id="card-${esc(b.id)}">
@@ -998,6 +1105,9 @@ function attachCardActions() {
   });
   document.querySelectorAll('.btn-reject').forEach(btn => {
     btn.addEventListener('click', () => openRejectModal(btn.dataset.id, btn.dataset.name));
+  });
+  document.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', () => openEditModal(btn.dataset.id));
   });
 }
 
@@ -1272,6 +1382,101 @@ updateStats = function() {
   _origUpdateStats();
   if (document.getElementById('tab-calendar').style.display !== 'none') renderCalendar();
 };
+
+// ── Edit booking modal ────────────────────────────────────────────────────
+const editModal       = document.getElementById('edit-modal');
+const editCancelBtn   = document.getElementById('edit-cancel');
+const editSaveBtn     = document.getElementById('edit-save');
+const editIdInput     = document.getElementById('edit-id');
+const editFullName    = document.getElementById('edit-fullName');
+const editEmailInput  = document.getElementById('edit-email');
+const editPhoneInput  = document.getElementById('edit-phone');
+const editServiceInput= document.getElementById('edit-service');
+const editDateInput   = document.getElementById('edit-date');
+const editTimeInput   = document.getElementById('edit-time');
+const editNotesInput  = document.getElementById('edit-notes');
+const editMessageInput= document.getElementById('edit-message');
+
+function openEditModal(id) {
+  const b = allData.find(x => x.id === id);
+  if (!b) { showToast('Booking not found.', 'error'); return; }
+
+  editIdInput.value      = b.id;
+  editFullName.value     = b.fullName || '';
+  editEmailInput.value   = b.email || '';
+  editPhoneInput.value   = b.phone || '';
+  editServiceInput.value = b.service || '';
+  editDateInput.value    = b.date || '';   // YYYY-MM-DD already
+  editTimeInput.value    = b.time || '';   // HH:MM already
+  editNotesInput.value   = b.notes || '';
+  editMessageInput.value = '';
+
+  editModal.classList.add('open');
+  setTimeout(() => editFullName.focus(), 200);
+}
+
+function closeEditModal() {
+  editModal.classList.remove('open');
+  editSaveBtn.textContent = 'Save & Notify Patient';
+  editSaveBtn.disabled = false;
+}
+
+editCancelBtn.addEventListener('click', closeEditModal);
+editModal.addEventListener('click', e => { if (e.target === editModal) closeEditModal(); });
+
+editSaveBtn.addEventListener('click', () => {
+  // Basic validation
+  const fullName = editFullName.value.trim();
+  const email    = editEmailInput.value.trim();
+  const phone    = editPhoneInput.value.trim();
+  const service  = editServiceInput.value.trim();
+  const date     = editDateInput.value;
+  const time     = editTimeInput.value;
+
+  if (!fullName || !email || !phone || !service || !date || !time) {
+    showToast('Please fill in all required fields.', 'error');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('Please enter a valid email.', 'error');
+    return;
+  }
+
+  editSaveBtn.textContent = 'Saving...';
+  editSaveBtn.disabled = true;
+
+  const body = new FormData();
+  body.append('adminAction', 'update');
+  body.append('token',    token);
+  body.append('id',       editIdInput.value);
+  body.append('fullName', fullName);
+  body.append('email',    email);
+  body.append('phone',    phone);
+  body.append('service',  service);
+  body.append('date',     date);
+  body.append('time',     time);
+  body.append('notes',    editNotesInput.value.trim());
+  body.append('message',  editMessageInput.value.trim());
+
+  fetch(SCRIPT_URL, { method: 'POST', body })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        showToast('Booking updated. Patient has been notified.', 'success');
+        closeEditModal();
+        setTimeout(() => loadData(), 600);
+      } else {
+        showToast(d.error || 'Could not update booking.', 'error');
+        editSaveBtn.textContent = 'Save & Notify Patient';
+        editSaveBtn.disabled = false;
+      }
+    })
+    .catch(() => {
+      showToast('Connection error. Try again.', 'error');
+      editSaveBtn.textContent = 'Save & Notify Patient';
+      editSaveBtn.disabled = false;
+    });
+});
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function showLoader(elId) {

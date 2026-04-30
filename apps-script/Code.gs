@@ -104,6 +104,7 @@ function doPost(e) {
     }
     if (data.adminAction === 'approve') return handleApproveBooking(data);
     if (data.adminAction === 'reject')  return handleRejectBooking(data);
+    if (data.adminAction === 'update')  return handleUpdateBooking(data);
     return jsonOut({ success: false, error: 'Unknown admin action' });
   }
 
@@ -243,6 +244,220 @@ function handleRejectBooking(data) {
   } finally {
     try { lock.releaseLock(); } catch (e) {}
   }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Admin: update (edit) a booking + notify patient
+// Expected POST fields:
+//   id, fullName, email, phone, service, date, time, notes,
+//   message (optional concierge note included in patient email)
+// ─────────────────────────────────────────────────────────────
+
+function handleUpdateBooking(data) {
+  var bookingId = data.id;
+  if (!bookingId) return jsonOut({ success: false, error: 'Missing booking id.' });
+
+  var lock = LockService.getScriptLock();
+  try { lock.waitLock(10000); } catch (e) {
+    return jsonOut({ success: false, error: 'System busy. Try again.' });
+  }
+  try {
+    var ss    = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('Appointments');
+    if (!sheet || sheet.getLastRow() <= 1) return jsonOut({ success: false, error: 'No bookings found.' });
+
+    var numRows = sheet.getLastRow() - 1;
+    var rows    = sheet.getRange(2, 1, numRows, 10).getValues();
+    var rowIdx  = -1;
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i][9] === bookingId) { rowIdx = i; break; }
+    }
+    if (rowIdx === -1) return jsonOut({ success: false, error: 'Booking not found.' });
+
+    var oldRow = rows[rowIdx];
+    var oldData = {
+      fullName: oldRow[1] || '',
+      email:    oldRow[2] || '',
+      phone:    oldRow[3] || '',
+      service:  oldRow[4] || '',
+      date:     normalizeSheetDate(oldRow[5]),
+      time:     normalizeSheetTime(oldRow[6]),
+      notes:    oldRow[7] || '',
+      status:   (oldRow[8] || 'Approved').toString().trim()
+    };
+
+    // Build the new data — fall back to old values if not supplied
+    var newData = {
+      fullName: (data.fullName || oldData.fullName).toString().trim(),
+      email:    (data.email    || oldData.email).toString().trim(),
+      phone:    (data.phone    || oldData.phone).toString().trim(),
+      service:  (data.service  || oldData.service).toString().trim(),
+      date:     (data.date     || oldData.date).toString().trim(),
+      time:     (data.time     || oldData.time).toString().trim(),
+      notes:    (data.notes !== undefined ? data.notes : oldData.notes).toString().trim(),
+      status:   oldData.status
+    };
+
+    // Persist updated cells. Sheet rows are 1-indexed and we have a header row.
+    var sheetRow = rowIdx + 2;
+    sheet.getRange(sheetRow, 2).setValue(newData.fullName);
+    sheet.getRange(sheetRow, 3).setValue(newData.email);
+    sheet.getRange(sheetRow, 4).setValue(newData.phone);
+    sheet.getRange(sheetRow, 5).setValue(newData.service);
+    // Cols 6-7 are text-formatted to avoid Sheets auto-formatting dates/times
+    sheet.getRange(sheetRow, 6, 1, 2).setNumberFormat('@');
+    sheet.getRange(sheetRow, 6).setValue(newData.date);
+    sheet.getRange(sheetRow, 7).setValue(newData.time);
+    sheet.getRange(sheetRow, 8).setValue(newData.notes);
+
+    // If this was already Approved, sync the calendar event
+    var dateOrTimeOrServiceChanged =
+      oldData.date !== newData.date ||
+      oldData.time !== newData.time ||
+      oldData.service !== newData.service ||
+      oldData.fullName !== newData.fullName;
+
+    var config = getConfigObject();
+    if (oldData.status === 'Approved' && dateOrTimeOrServiceChanged) {
+      try { removeCalendarEventFor(oldData, config); } catch (err) { Logger.log('removeCalendarEventFor failed: ' + err); }
+      try { createClinicCalendarEvent(newData, config); } catch (err) { Logger.log('createClinicCalendarEvent failed: ' + err); }
+    }
+
+    // Notify patient if we have an email on file
+    if (newData.email) {
+      var concMsg = (data.message || '').toString().trim();
+      sendPatientUpdatedEmail(oldData, newData, config, concMsg);
+    }
+
+    return jsonOut({ success: true, message: 'Booking updated.' });
+  } catch (err) {
+    Logger.log('handleUpdateBooking error: ' + err);
+    return jsonOut({ success: false, error: err.toString() });
+  } finally {
+    try { lock.releaseLock(); } catch (e) {}
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Calendar: remove existing event for a booking (used on update)
+// Matches by date + time + patient name on the configured calendar.
+// ─────────────────────────────────────────────────────────────
+
+function removeCalendarEventFor(data, config) {
+  var calendarId = (config.CALENDAR_ID || '').trim();
+  if (!calendarId || calendarId === 'primary') return;
+  if (!data.date || !data.time) return;
+
+  var cal = CalendarApp.getCalendarById(calendarId);
+  if (!cal) return;
+
+  var dur   = parseInt(config.CALENDAR_DURATION_MINS || '60', 10);
+  var dp    = data.date.split('-').map(Number);
+  var tp    = data.time.split(':').map(Number);
+  var start = new Date(dp[0], dp[1]-1, dp[2], tp[0], tp[1], 0);
+  var end   = new Date(start.getTime() + dur * 60000);
+
+  // Search a small window around the slot to be safe
+  var windowStart = new Date(start.getTime() - 5 * 60000);
+  var windowEnd   = new Date(end.getTime()   + 5 * 60000);
+  var events = cal.getEvents(windowStart, windowEnd);
+
+  var nameNeedle = (data.fullName || '').toLowerCase();
+  events.forEach(function(ev) {
+    var title = (ev.getTitle() || '').toLowerCase();
+    if (nameNeedle && title.indexOf(nameNeedle) === -1) return;
+    try { ev.deleteEvent(); Logger.log('[calendar] removed event: ' + ev.getTitle()); }
+    catch (err) { Logger.log('[calendar] delete failed: ' + err); }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Patient email: "Your booking has been updated"
+// ─────────────────────────────────────────────────────────────
+
+function sendPatientUpdatedEmail(oldData, newData, config, concMsg) {
+  var clinicName = config.CLINIC_NAME    || 'TomFord Dental';
+  var phone      = config.CLINIC_PHONE   || '';
+  var email      = config.CLINIC_EMAIL   || '';
+  var hours      = config.CLINIC_HOURS   || '';
+  var addr       = config.CLINIC_ADDRESS || '';
+  var tag        = config.BOOKING_TAGLINE|| 'where every tooth matters.';
+
+  var oldDd = formatDisplayDate(oldData.date);
+  var oldDt = formatDisplayTime(oldData.time);
+  var newDd = formatDisplayDate(newData.date);
+  var newDt = formatDisplayTime(newData.time);
+
+  var changeLines = [];
+  if (oldData.service  !== newData.service)  changeLines.push({ label: 'Service', oldVal: oldData.service,  newVal: newData.service  });
+  if (oldData.date     !== newData.date)     changeLines.push({ label: 'Date',    oldVal: oldDd,            newVal: newDd            });
+  if (oldData.time     !== newData.time)     changeLines.push({ label: 'Time',    oldVal: oldDt,            newVal: newDt            });
+  if (oldData.fullName !== newData.fullName) changeLines.push({ label: 'Name',    oldVal: oldData.fullName, newVal: newData.fullName });
+
+  var changesHtml = '';
+  changeLines.forEach(function(c) {
+    changesHtml +=
+      '<tr><td style="color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:.1em;width:90px;vertical-align:top;padding:6px 0;">'+c.label+'</td>'
+      +'<td style="padding:6px 0;color:#6b7280;font-size:13px;text-decoration:line-through;">'+c.oldVal+'</td></tr>'
+      +'<tr><td></td><td style="padding:0 0 8px;color:#111827;font-size:14px;font-weight:700;">'+c.newVal+'</td></tr>';
+  });
+  if (!changesHtml) {
+    changesHtml = '<tr><td colspan="2" style="padding:8px 0;color:#4b5563;font-size:13px;">Your contact details or notes were updated. Time and date are unchanged.</td></tr>';
+  }
+
+  var concBlock = concMsg
+    ? '<div style="background:#fff8f3;border-left:4px solid #f46709;border-radius:8px;padding:14px 18px;margin:18px 0;">'
+      +'<p style="margin:0 0 4px;color:#7c2d04;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;">Note from the clinic</p>'
+      +'<p style="margin:0;color:#4b5563;font-size:13px;line-height:1.7;">'+concMsg+'</p></div>'
+    : '';
+
+  var subj = 'Booking Updated - ' + clinicName + ' - ' + newDd;
+
+  var html =
+    '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">'
+    +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 16px;"><tr><td align="center">'
+    +'<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.07);">'
+    +'<tr><td style="background:linear-gradient(135deg,#f46709,#e05800);padding:32px 36px;text-align:center;">'
+    +'<p style="margin:0;color:rgba(255,255,255,.7);font-size:11px;letter-spacing:.3em;text-transform:uppercase;">Booking Updated</p>'
+    +'<h1 style="margin:8px 0 4px;color:#fff;font-size:24px;font-family:Georgia,serif;">'+clinicName+'</h1>'
+    +'<p style="margin:0;color:rgba(255,255,255,.8);font-size:12px;font-style:italic;font-family:Georgia,serif;">'+tag+'</p>'
+    +'</td></tr>'
+    +'<tr><td style="padding:32px 36px 24px;">'
+    +'<p style="margin:0 0 6px;color:#111827;font-size:16px;font-weight:700;">Hi '+(newData.fullName||'there')+',</p>'
+    +'<p style="margin:0 0 22px;color:#4b5563;font-size:14px;line-height:1.7;">Our team has updated the details of your booking. Here is what changed:</p>'
+    +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8f3;border-radius:12px;border-left:4px solid #f46709;margin-bottom:18px;">'
+    +'<tr><td style="padding:18px 22px;">'
+    +'<p style="margin:0 0 14px;color:#f46709;font-size:10px;letter-spacing:.25em;text-transform:uppercase;font-weight:700;">Updated Details</p>'
+    +'<table width="100%" cellpadding="0" cellspacing="0">'+changesHtml+'</table>'
+    +'</td></tr></table>'
+    + concBlock
+    +'<div style="background:#fef3f2;border-radius:10px;padding:14px 18px;margin-bottom:22px;">'
+    +'<p style="margin:0;color:#991b1b;font-size:13px;"><strong>Are you okay with this change?</strong></p>'
+    +'<p style="margin:6px 0 0;color:#6b7280;font-size:12px;line-height:1.6;">Please reply to this email or call us at <strong>'+phone+'</strong> to confirm. If we do not hear from you, we will assume the new slot works.</p>'
+    +'</div>'
+    +'<p style="margin:0 0 6px;color:#111827;font-size:14px;font-weight:700;">New appointment summary</p>'
+    +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:10px;margin-bottom:18px;">'
+    +'<tr><td style="padding:14px 18px;">'
+    +'<table width="100%" cellpadding="4" cellspacing="0">'
+    +'<tr><td style="color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:.1em;width:80px;">Service</td><td style="color:#111827;font-size:13px;font-weight:600;">'+(newData.service||'-')+'</td></tr>'
+    +'<tr><td style="color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:.1em;">Date</td><td style="color:#111827;font-size:13px;font-weight:600;">'+newDd+'</td></tr>'
+    +'<tr><td style="color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:.1em;">Time</td><td style="color:#111827;font-size:13px;font-weight:600;">'+newDt+'</td></tr>'
+    +'</table>'
+    +'</td></tr></table>'
+    +'<p style="margin:0;color:#6b7280;font-size:13px;">Questions? Call <strong style="color:#111827;">'+phone+'</strong>'+(email?' or email <a href="mailto:'+email+'" style="color:#f46709;text-decoration:none;">'+email+'</a>':'')+'</p>'
+    +'</td></tr>'
+    +'<tr><td style="background:#fafafa;border-top:1px solid #f3f4f6;padding:18px 36px;text-align:center;">'
+    +'<p style="margin:0 0 3px;color:#111827;font-size:13px;font-weight:700;">'+clinicName+'</p>'
+    +'<p style="margin:0 0 2px;color:#9ca3af;font-size:11px;">'+addr+'</p>'
+    +'<p style="margin:0;color:#9ca3af;font-size:11px;">'+hours+'</p>'
+    +'</td></tr>'
+    +'</table>'
+    +'</td></tr></table></body></html>';
+
+  GmailApp.sendEmail(newData.email, subj,
+    'Hi '+(newData.fullName||'there')+', we updated your booking. Please reply to this email or call '+phone+' to confirm the new details.',
+    { htmlBody: html, name: clinicName, replyTo: email || undefined }
+  );
 }
 
 // ─────────────────────────────────────────────────────────────
