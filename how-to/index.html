@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TomFord Dental — Booking System Guide</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --orange: #f46709;
+      --orange-lt: #fff3e8;
+      --orange-dk: #e05800;
+      --black: #111827;
+      --gray-dark: #374151;
+      --gray: #6b7280;
+      --gray-lt: #9ca3af;
+      --border: #f3f4f6;
+      --bg: #fafafa;
+      --green: #10b981;
+      --green-lt: #ecfdf5;
+      --yellow: #f59e0b;
+      --yellow-lt: #fffbeb;
+      --red: #ef4444;
+      --red-lt: #fef2f2;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--black);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--orange), var(--orange-dk));
+      color: white;
+      border-radius: 18px;
+      padding: 36px 32px;
+      margin-bottom: 36px;
+      box-shadow: 0 12px 40px rgba(244,103,9,.15);
+    }
+    .header-eyebrow {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: .25em; text-transform: uppercase;
+      opacity: .8;
+      margin-bottom: 10px;
+    }
+    .header h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 36px; font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 15px; opacity: .92;
+      max-width: 520px;
+    }
+    /* TL;DR card */
+    .tldr {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin-bottom: 36px;
+      display: flex; gap: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+    .tldr-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--orange-lt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .tldr-body strong { color: var(--orange); }
+    /* Section */
+    section { margin-bottom: 44px; }
+    h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26px; font-weight: 700; color: var(--black);
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    h2 .num {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--orange); color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    h3 {
+      font-size: 16px; font-weight: 700;
+      color: var(--black);
+      margin: 22px 0 8px;
+    }
+    p { margin-bottom: 12px; color: var(--gray-dark); }
+    ul, ol { margin: 0 0 14px 22px; color: var(--gray-dark); }
+    li { margin-bottom: 8px; }
+    li::marker { color: var(--orange); }
+    /* Link cards */
+    .link-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 18px 0 8px;
+    }
+    @media (max-width: 540px) { .link-grid { grid-template-columns: 1fr; } }
+    .link-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      display: flex; flex-direction: column; gap: 4px;
+      transition: all .15s;
+    }
+    .link-card:hover {
+      border-color: var(--orange);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(244,103,9,.08);
+    }
+    .link-card-label {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--orange);
+    }
+    .link-card-title { font-size: 15px; font-weight: 600; color: var(--black); }
+    .link-card-desc  { font-size: 12px; color: var(--gray); }
+    /* Step list */
+    .steps {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px 0;
+      margin: 16px 0;
+    }
+    .step {
+      display: flex; gap: 14px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--orange-lt); color: var(--orange);
+      font-size: 13px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-body strong { color: var(--black); }
+    .step-body { font-size: 14px; }
+    /* Callout */
+    .callout {
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 14px;
+      border-left: 4px solid;
+    }
+    .callout.info    { background: var(--orange-lt); border-color: var(--orange);  color: #7c2d04; }
+    .callout.warning { background: var(--yellow-lt); border-color: var(--yellow);  color: #78350f; }
+    .callout.success { background: var(--green-lt);  border-color: var(--green);   color: #065f46; }
+    .callout strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    /* Status pills */
+    .pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 50px;
+      font-size: 11px; font-weight: 700;
+      vertical-align: middle;
+    }
+    .pill.pending  { background: var(--yellow-lt); color: #92400e; }
+    .pill.approved { background: var(--green-lt);  color: #065f46; }
+    .pill.declined { background: var(--red-lt);    color: #991b1b; }
+    /* FAQ */
+    details {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    details[open] { border-color: var(--orange); }
+    summary {
+      padding: 14px 18px;
+      cursor: pointer;
+      font-size: 14px; font-weight: 600;
+      color: var(--black);
+      list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; font-size: 18px; color: var(--orange); font-weight: 400; }
+    details[open] summary::after { content: '−'; }
+    details p {
+      padding: 0 18px 16px;
+      font-size: 14px; color: var(--gray-dark);
+      margin: 0;
+    }
+    /* Footer */
+    .footer {
+      margin-top: 56px;
+      padding: 24px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--gray);
+    }
+    .footer strong { color: var(--black); }
+    code {
+      background: var(--orange-lt);
+      color: var(--orange-dk);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: 'SF Mono', Menlo, monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-eyebrow">Booking System Guide</div>
+      <h1>How TomFord Dental's online booking works</h1>
+      <p>A quick walkthrough so you can test everything before going live with patients.</p>
+    </header>
+
+    <!-- TL;DR -->
+    <div class="tldr">
+      <div class="tldr-icon">⚡</div>
+      <div class="tldr-body">
+        <strong>In one sentence:</strong> Patients book through the website, you receive an email + see them in the Sheet & Admin Panel, you approve or decline, and the patient gets a confirmation with a calendar invite.
+      </div>
+    </div>
+
+    <!-- Quick links -->
+    <section>
+      <h2><span class="num">1</span> Your tools</h2>
+      <p>Bookmark these — these are the four places you'll work with every day.</p>
+      <div class="link-grid">
+        <a class="link-card" href="https://tomforddental.com" target="_blank" rel="noopener">
+          <div class="link-card-label">Patient-Facing</div>
+          <div class="link-card-title">Your website</div>
+          <div class="link-card-desc">Where patients book — tomforddental.com</div>
+        </a>
+        <a class="link-card" href="https://tomforddental.com/admin" target="_blank" rel="noopener">
+          <div class="link-card-label">Daily Workspace</div>
+          <div class="link-card-title">Admin Panel</div>
+          <div class="link-card-desc">Approve or decline requests here</div>
+        </a>
+        <a class="link-card" href="https://docs.google.com/spreadsheets/d/1L5bP2Jv3colCXmdWEInEyhXAdij68--kYtY5xDg3W98/edit" target="_blank" rel="noopener">
+          <div class="link-card-label">Source of Truth</div>
+          <div class="link-card-title">Bookings Google Sheet</div>
+          <div class="link-card-desc">Every booking is saved here</div>
+        </a>
+        <a class="link-card" href="https://calendar.google.com/calendar/u/0/r" target="_blank" rel="noopener">
+          <div class="link-card-label">Schedule</div>
+          <div class="link-card-title">Google Calendar</div>
+          <div class="link-card-desc">Approved appointments appear here</div>
+        </a>
+      </div>
+      <div class="callout info">
+        <strong>Admin Panel password</strong>
+        Use the password we agreed on when signing in. If you forget it, message Paolo to reset it.
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section>
+      <h2><span class="num">2</span> How a booking flows</h2>
+      <p>From the moment a patient clicks "Book a Consultation" to the final confirmation, here's exactly what happens behind the scenes.</p>
+
+      <h3>Patient side — when they book</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-body">Patient visits <strong>tomforddental.com</strong> and clicks <em>Book a Consultation</em>.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body">They pick a <strong>service</strong> (e.g. Veneers, Cleaning), an available <strong>date</strong>, and an open <strong>time slot</strong>.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body">They fill in their <strong>name, email, and phone</strong>, then submit.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body">They immediately receive a <strong>"Request Received"</strong> email — this is NOT a confirmation yet, just a heads-up that you'll review.</div></div>
+      </div>
+
+      <h3>Clinic side — when you receive a booking</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-body">You get a <strong>"🔔 New Request"</strong> email at the clinic inbox with all the patient details and a button to review.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body">A new row appears in the <strong>Bookings Sheet</strong> with status <span class="pill pending">Pending</span>.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body">You log into the <strong>Admin Panel</strong> and see it in the <em>Pending Requests</em> tab.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body">You decide: <strong>Approve</strong> ✅ or <strong>Decline</strong> ❌.</div></div>
+      </div>
+
+      <h3>What happens after you approve</h3>
+      <ul>
+        <li>The patient gets a <strong>"Confirmed!"</strong> email with the appointment details and an "Add to Google Calendar" button.</li>
+        <li>The appointment is added to the clinic's <strong>Google Calendar</strong> automatically.</li>
+        <li>The booking row in the Sheet flips to <span class="pill approved">Approved</span>.</li>
+        <li>That time slot is locked — no other patient can book it.</li>
+      </ul>
+
+      <h3>What happens if you decline</h3>
+      <ul>
+        <li>You can optionally write a short note explaining why (e.g. "Dr. Tom unavailable that day").</li>
+        <li>The patient gets a polite "Update on Your Booking Request" email with your note.</li>
+        <li>The slot is freed up — another patient can book it.</li>
+        <li>The booking row stays in the Sheet with status <span class="pill declined">Declined</span> for your records.</li>
+      </ul>
+    </section>
+
+    <!-- How to test -->
+    <section>
+      <h2><span class="num">3</span> How to test it</h2>
+      <p>The best way to learn is to do a full test booking yourself, end-to-end. This takes about 5 minutes.</p>
+
+      <h3>Step 1 — Make a fake booking</h3>
+      <ol>
+        <li>Open <a href="https://tomforddental.com" target="_blank" rel="noopener">tomforddental.com</a> in your browser.</li>
+        <li>Click <strong>Book a Consultation</strong>.</li>
+        <li>Use a real email address you can check (e.g. your personal Gmail) so you can see the patient-side emails.</li>
+        <li>Pick any service, date, and time. Submit.</li>
+      </ol>
+
+      <h3>Step 2 — Check the four places</h3>
+      <ol>
+        <li><strong>Your inbox</strong> — you should see the "Request Received" email within ~30 seconds.</li>
+        <li><strong>The clinic inbox</strong> — you should see the "🔔 New Request" notification.</li>
+        <li><strong>The Bookings Sheet</strong> — open it and confirm a new row was added at the bottom with status "Pending".</li>
+        <li><strong>The Admin Panel</strong> — log in and confirm the booking shows up under "Pending Requests".</li>
+      </ol>
+
+      <h3>Step 3 — Approve it</h3>
+      <ol>
+        <li>In the Admin Panel, click <strong>Approve</strong> on your test booking.</li>
+        <li>Check your patient inbox — you should get the "Confirmed!" email with the calendar button.</li>
+        <li>Check Google Calendar — you should see the new event for that date and time.</li>
+        <li>Back in the Sheet — confirm the status changed to "Approved".</li>
+      </ol>
+
+      <h3>Step 4 — Try declining (optional, on a different test booking)</h3>
+      <ol>
+        <li>Make another fake booking.</li>
+        <li>In the Admin Panel, click <strong>Decline</strong>.</li>
+        <li>Type a short reason like "Just testing — please ignore."</li>
+        <li>Confirm the patient gets the rejection email and the Sheet row says "Declined".</li>
+      </ol>
+
+      <div class="callout success">
+        <strong>✅ If all of the above worked, the system is healthy and ready for real patients.</strong>
+        If anything didn't work, write down which step failed and message Paolo with the details.
+      </div>
+    </section>
+
+    <!-- Admin panel tour -->
+    <section>
+      <h2><span class="num">4</span> Admin Panel tour</h2>
+      <p>The Admin Panel is where you'll spend most of your time. Here's what each section does.</p>
+
+      <h3>📥 Pending Requests</h3>
+      <p>New bookings that haven't been reviewed yet. You'll see the patient's name, contact info, the service they want, and the date/time. Approve or decline from here. The number badge in the sidebar shows you how many are waiting.</p>
+
+      <h3>📅 Calendar View</h3>
+      <p>A monthly overview of all your appointments — both pending and approved. Click any event to jump to it, or click the "Open Google Calendar" button to view it in your full Google Calendar. <em>(New)</em></p>
+
+      <h3>📋 All Bookings</h3>
+      <p>The full history — pending, approved, declined. Useful if a patient calls and you need to look up their appointment.</p>
+
+      <h3>🔢 Stats at the top</h3>
+      <p>Quick counts: how many total bookings, how many pending, how many approved, how many declined.</p>
+    </section>
+
+    <!-- Sheet tour -->
+    <section>
+      <h2><span class="num">5</span> Bookings Sheet tour</h2>
+      <p>The Google Sheet is the source of truth. Everything the booking system uses (your settings, services, and bookings) lives here.</p>
+
+      <h3>Tab: <code>Services</code></h3>
+      <p>One service per row in column A. To add or remove a service from the booking form, edit this tab — no code changes needed.</p>
+
+      <h3>Tab: <code>Config</code></h3>
+      <p>Settings like opening hours, slot length, clinic phone, etc. Edit the values in column B. Changes show up on the website within a minute. <strong>Don't change column A keys</strong> unless asked — those are the variable names the code looks for.</p>
+      <p>Common things you might want to change:</p>
+      <ul>
+        <li><code>OPEN_TIME</code> / <code>CLOSE_TIME</code> — daily opening hours</li>
+        <li><code>SLOT_DURATION_MINS</code> — how long each appointment slot is (currently 60 minutes)</li>
+        <li><code>OPEN_DAYS</code> — which days you're open (1=Mon, 6=Sat)</li>
+        <li><code>ADVANCE_BOOKING_DAYS</code> — how far ahead patients can book (currently 30 days)</li>
+        <li><code>CLINIC_PHONE</code>, <code>CLINIC_EMAIL</code>, <code>CLINIC_HOURS</code> — info shown in the email footers</li>
+      </ul>
+
+      <h3>Tab: <code>Appointments</code></h3>
+      <p>This is the list of every booking. Don't manually edit this — let the Admin Panel manage it. You can use it to read or filter, but writing changes here directly can break things.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section>
+      <h2><span class="num">6</span> Common questions</h2>
+
+      <details>
+        <summary>What if a patient picks a slot that's already taken?</summary>
+        <p>They can't — taken slots are automatically hidden from the booking form. The system also double-checks at submission time, so even if someone tries to book the exact same slot at the same moment as another patient, only the first one goes through.</p>
+      </details>
+
+      <details>
+        <summary>Can patients book on Sundays?</summary>
+        <p>By default, no — the clinic is closed on Sundays per the <code>OPEN_DAYS</code> setting. To change that, edit the Config tab.</p>
+      </details>
+
+      <details>
+        <summary>Can patients book at 3am or right at closing time?</summary>
+        <p>No. There's a 1-hour buffer (you can change this with <code>SLOT_BUFFER_MINS</code>), so patients can only book slots starting at least 1 hour from now. Slots are also limited to within your opening hours.</p>
+      </details>
+
+      <details>
+        <summary>What if I miss a request and forget to approve it?</summary>
+        <p>The patient won't get a confirmation, but the slot is still held for them. Best practice: check the Pending tab once or twice a day. If you decide later it won't work, decline and the patient gets notified.</p>
+      </details>
+
+      <details>
+        <summary>Can I edit a booking after approving it?</summary>
+        <p>Not yet — that feature is coming soon. For now, if a patient needs to reschedule, decline the original booking with a friendly note asking them to rebook for a new slot.</p>
+      </details>
+
+      <details>
+        <summary>What if I approve by mistake?</summary>
+        <p>The calendar event will be created and the confirmation email sent. The fastest fix is to call the patient directly to explain. Then in Google Calendar, delete the event manually. (We'll add an "undo" feature in a future update.)</p>
+      </details>
+
+      <details>
+        <summary>How do I add a new service?</summary>
+        <p>Open the Sheet → <code>Services</code> tab → type the new service name in column A on a new row. That's it — it shows up in the booking form within a minute.</p>
+      </details>
+
+      <details>
+        <summary>How do I change clinic opening hours?</summary>
+        <p>Open the Sheet → <code>Config</code> tab → edit <code>OPEN_TIME</code> (e.g. <code>09:00</code>) and <code>CLOSE_TIME</code> (e.g. <code>19:00</code>). Use 24-hour format. Make sure the cells are formatted as plain text (not as time values).</p>
+      </details>
+
+      <details>
+        <summary>Can I see who declined a booking and why?</summary>
+        <p>Yes — go to the All Bookings tab in the Admin Panel. Declined bookings stay in the list with their status. The reason you typed is saved in the Sheet's Notes column.</p>
+      </details>
+
+      <details>
+        <summary>What if the website goes down or stops accepting bookings?</summary>
+        <p>Message Paolo immediately. In the meantime, patients can still call or email the clinic. The website is hosted on Cloudflare and the booking backend on Google's infrastructure — both are very reliable, but if anything is wrong we'll fix it within hours.</p>
+      </details>
+    </section>
+
+    <!-- Heads-up -->
+    <section>
+      <h2><span class="num">7</span> Things to keep in mind</h2>
+      <div class="callout warning">
+        <strong>⚠️ During this testing period</strong>
+        Right now, booking notifications go to <code>domingopauljohn@gmail.com</code> (Paolo's account) instead of the clinic inbox. Once we transfer ownership, this will switch to <code>tomford.dental@gmail.com</code> and you'll receive notifications directly. Plan for this transition next week.
+      </div>
+      <div class="callout info">
+        <strong>📧 Where do confirmation emails come from?</strong>
+        Right now the "from" address is Paolo's Gmail (with the display name "TomFord Dental"). After we transfer ownership to the clinic's Gmail, emails will come from your clinic email address. Patients seldom notice — most read the display name, not the address.
+      </div>
+      <div class="callout success">
+        <strong>💡 Pro tip — keep the Admin Panel pinned</strong>
+        Open <a href="https://tomforddental.com/admin" target="_blank" rel="noopener" style="color:#065f46;font-weight:700;text-decoration:underline;">tomforddental.com/admin</a> and pin the tab in your browser. The pending count badge updates automatically when new bookings come in.
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p><strong>TomFord Dental — Booking System</strong></p>
+      <p style="margin-top:6px;">Built and supported by <strong>Paolo Domingo</strong> · domingopauljohn@gmail.com</p>
+      <p style="margin-top:6px;font-size:12px;color:var(--gray-lt);">Last updated April 30, 2026</p>
+    </div>
+
+  </div>
+</body>
+</html>
