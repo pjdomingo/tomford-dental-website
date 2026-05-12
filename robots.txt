@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /how-to
+
+Sitemap: https://tomforddental.com/sitemap.xml
