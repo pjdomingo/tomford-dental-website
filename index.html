@@ -339,6 +339,66 @@
         .faq-item.active .faq-icon svg { transform: rotate(90deg); }
         .faq-item.active .faq-icon .h-line { opacity: 0; transform: scaleX(0.1); }
 
+        /* ─── SERVICE CHIPS (multi-select in booking form) ─ */
+        .service-chips {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            padding: 6px 0 2px;
+        }
+        .service-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            border: 1.5px solid rgba(12,26,54,0.15);
+            background: #ffffff;
+            color: rgba(12,26,54,0.75);
+            font-size: 0.78rem; font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            font-family: inherit;
+        }
+        .service-chip:hover {
+            border-color: rgba(244,103,9,0.5);
+            color: #f46709;
+            background: rgba(244,103,9,0.04);
+        }
+        .service-chip.selected {
+            background: #f46709;
+            border-color: #f46709;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(244,103,9,0.25);
+        }
+        .service-chip.selected:hover {
+            background: #e05800;
+            border-color: #e05800;
+            color: #fff;
+        }
+        .service-chip:disabled,
+        .service-chip[aria-disabled="true"] {
+            opacity: 0.4; cursor: not-allowed;
+            background: rgba(12,26,54,0.03);
+        }
+        .service-chip:disabled:hover,
+        .service-chip[aria-disabled="true"]:hover {
+            border-color: rgba(12,26,54,0.15);
+            color: rgba(12,26,54,0.75);
+            background: rgba(12,26,54,0.03);
+        }
+        .service-chip-check {
+            width: 14px; height: 14px;
+            display: none; flex-shrink: 0;
+        }
+        .service-chip.selected .service-chip-check { display: inline-block; }
+        .service-helper {
+            margin-top: 10px;
+            font-size: 0.72rem;
+            color: rgba(12,26,54,0.55);
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            flex-wrap: wrap;
+        }
+        .service-counter { font-weight: 600; color: #f46709; }
+
         /* ─── TESTIMONIALS ──────────────────────────────── */
         .testimonial-fade { transition: opacity 0.35s ease; }
 
@@ -1060,15 +1120,17 @@
                         </div>
                     </label>
 
-                    <label class="block">
-                        <span class="text-xs tracking-[0.18em] uppercase text-secondary/50">Service</span>
-                        <div class="input-wrap">
-                            <select id="service" name="service" required class="booking-input-v2">
-                                <option value="" disabled selected>Loading services…</option>
-                            </select>
-                            <span class="input-line"></span>
+                    <div class="block">
+                        <span class="text-xs tracking-[0.18em] uppercase text-secondary/50">Services <span class="normal-case tracking-normal text-secondary/40">(select up to 3)</span></span>
+                        <div class="service-chips" id="serviceChips" role="group" aria-label="Select services">
+                            <!-- Chips populated by JS -->
                         </div>
-                    </label>
+                        <input type="hidden" id="service" name="service" />
+                        <div class="service-helper">
+                            <span><span class="service-counter" id="serviceCounter">0</span> of 3 selected</span>
+                            <span class="text-secondary/40">Initial booking is 60 minutes — we'll confirm if more time is needed.</span>
+                        </div>
+                    </div>
 
                     <!-- SLOT PICKER -->
                     <div>
@@ -1559,7 +1621,7 @@
             if (!validateEmail(emailValue))   { showBookingToast('Please enter a valid email address.', true); return; }
             if (phoneDigits.length !== 11)    { showBookingToast('Please enter a valid phone number (11 digits).', true); return; }
             if (!dateValue || !timeValue) { showBookingToast('Please select an available time slot.', true); return; }
-            if (!serviceValue) { showBookingToast('Please select a service.', true); return; }
+            if (!serviceValue) { showBookingToast('Please select at least one service.', true); return; }
 
             const orig = bookingSubmitBtn.innerText;
             bookingSubmitBtn.disabled = true;
@@ -1584,6 +1646,8 @@
                     }
                     showBookingToast('Booking request sent! We will confirm your slot shortly.', false);
                     bookingForm.reset();
+                    // Reset is form-element-only; manually clear chip selections + hidden input
+                    if (window.__resetServiceChips) window.__resetServiceChips();
                     bookingSubmitBtn.disabled = false;
                     bookingSubmitBtn.innerText = orig;
                     closeBookingModal();
@@ -1622,17 +1686,77 @@
                 'Esthetic Restoration'
             ];
 
-            function populateServices(list) {
-                const sel = document.getElementById('service');
-                if (!sel) return;
-                sel.innerHTML = '<option value="" disabled selected>Select a service…</option>';
-                list.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s;
-                    opt.textContent = s;
-                    sel.appendChild(opt);
+            const MAX_SERVICES = 3;
+            const selectedServices = new Set();
+            const checkSvg = '<svg class="service-chip-check" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 11 8 15 16 6"/></svg>';
+
+            function syncHiddenInput() {
+                const hidden = document.getElementById('service');
+                if (hidden) hidden.value = Array.from(selectedServices).join(', ');
+            }
+
+            function updateCounter() {
+                const counter = document.getElementById('serviceCounter');
+                if (counter) counter.textContent = String(selectedServices.size);
+            }
+
+            function refreshChipStates() {
+                const chips = document.querySelectorAll('.service-chip');
+                const atLimit = selectedServices.size >= MAX_SERVICES;
+                chips.forEach(chip => {
+                    const name = chip.dataset.service;
+                    const isSelected = selectedServices.has(name);
+                    chip.classList.toggle('selected', isSelected);
+                    chip.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+                    if (atLimit && !isSelected) {
+                        chip.setAttribute('aria-disabled', 'true');
+                        chip.title = 'Maximum 3 services per booking';
+                    } else {
+                        chip.removeAttribute('aria-disabled');
+                        chip.removeAttribute('title');
+                    }
                 });
             }
+
+            function toggleService(name) {
+                if (selectedServices.has(name)) {
+                    selectedServices.delete(name);
+                } else {
+                    if (selectedServices.size >= MAX_SERVICES) return; // ignore over-limit clicks
+                    selectedServices.add(name);
+                }
+                syncHiddenInput();
+                updateCounter();
+                refreshChipStates();
+            }
+
+            function populateServices(list) {
+                const container = document.getElementById('serviceChips');
+                if (!container) return;
+                container.innerHTML = '';
+                list.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'service-chip';
+                    btn.dataset.service = s;
+                    btn.setAttribute('aria-pressed', 'false');
+                    btn.innerHTML = checkSvg + '<span>' + s + '</span>';
+                    btn.addEventListener('click', () => toggleService(s));
+                    container.appendChild(btn);
+                });
+                // Preserve any prior selections that survived a re-populate (e.g. live list arriving late)
+                refreshChipStates();
+                updateCounter();
+                syncHiddenInput();
+            }
+
+            // Exposed so the form submit handler can clear selections after success
+            window.__resetServiceChips = function() {
+                selectedServices.clear();
+                syncHiddenInput();
+                updateCounter();
+                refreshChipStates();
+            };
 
             // Try to fetch live list from Apps Script
             // The same scriptURL used for form submission can serve a services list
