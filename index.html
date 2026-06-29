@@ -798,17 +798,24 @@
 
                     <div class="mt-10" id="testimonialContent">
                         <article id="testimonialArticle" class="testimonial-fade border-l-4 border-gold pl-8 py-2">
-                            <p id="testimonialQuote" class="font-display text-xl lg:text-2xl italic leading-relaxed text-secondary"></p>
+                            <p id="testimonialQuote" class="font-display text-lg lg:text-xl italic leading-relaxed text-secondary"></p>
                             <div class="mt-6 flex items-center gap-4">
                                 <div>
                                     <p id="testimonialName" class="text-base font-semibold text-secondary"></p>
                                     <p id="testimonialTitle" class="mt-0.5 text-xs tracking-[0.22em] text-secondary/50"></p>
+                                    <p id="testimonialSource" class="mt-2 text-xs text-secondary/60 flex items-center gap-2">
+                                        <span class="text-gold tracking-wider">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                                        <span>via Google Reviews</span>
+                                    </p>
                                 </div>
                             </div>
                         </article>
-                        <div class="mt-8 flex gap-3">
-                            <button id="prevTestimonial" aria-label="Previous testimonial" class="rounded-full border border-secondary/25 p-3 text-secondary transition hover:border-primary hover:text-primary">&#8592;</button>
-                            <button id="nextTestimonial" aria-label="Next testimonial" class="rounded-full border border-secondary/25 p-3 text-secondary transition hover:border-primary hover:text-primary">&#8594;</button>
+                        <div class="mt-8 flex items-center justify-between flex-wrap gap-4">
+                            <div class="flex gap-3">
+                                <button id="prevTestimonial" aria-label="Previous testimonial" class="rounded-full border border-secondary/25 p-3 text-secondary transition hover:border-primary hover:text-primary">&#8592;</button>
+                                <button id="nextTestimonial" aria-label="Next testimonial" class="rounded-full border border-secondary/25 p-3 text-secondary transition hover:border-primary hover:text-primary">&#8594;</button>
+                            </div>
+                            <a href="https://www.google.com/search?q=TomFord+Dental+Clinic+Pasig+reviews" target="_blank" rel="noopener noreferrer" class="text-xs tracking-[0.18em] uppercase text-primary font-semibold border-b border-primary/40 hover:border-primary transition pb-0.5">See all reviews on Google &rarr;</a>
                         </div>
                     </div>
                 </div>
@@ -816,6 +823,37 @@
                 <div class="reveal relative overflow-hidden rounded-3xl lg:col-span-5 shadow-xl delay-200">
                     <img src="assets/480877265_122112631292736343_7297044902032121582_n.jpg" alt="Patient testimonial" class="h-full min-h-[580px] w-full object-cover" />
                     <div class="absolute inset-0 bg-gradient-to-br from-transparent to-secondary/20"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ PATIENT GALLERY ═══════════════════ -->
+        <section id="patient-gallery" class="py-24 bg-white">
+            <div class="mx-auto max-w-7xl px-6 lg:px-10">
+                <div class="reveal mb-12 max-w-2xl mx-auto text-center">
+                    <span class="section-label">The TomFord Family</span>
+                    <h2 class="mt-3 font-display text-4xl lg:text-5xl text-secondary leading-tight">Real Patients.<br/>Real Smiles.</h2>
+                    <p class="mt-5 text-secondary/70 leading-relaxed">Across cleanings, extractions, root canals, and everything in between — these are some of the people who trust us with their care.</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 lg:gap-5">
+                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group">
+                        <img src="assets/patients/patient-01.jpg" alt="TomFord Dental patient with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    </div>
+                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-100">
+                        <img src="assets/patients/patient-02.jpg" alt="TomFord Dental family visit" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    </div>
+                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-200">
+                        <img src="assets/patients/patient-03.jpg" alt="TomFord Dental patients with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    </div>
+                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-100">
+                        <img src="assets/patients/patient-04.jpg" alt="TomFord Dental family with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    </div>
+                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-200">
+                        <img src="assets/patients/patient-05.jpg" alt="TomFord Dental patient with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    </div>
+                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-300">
+                        <img src="assets/patients/patient-06.jpg" alt="TomFord Dental patient with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    </div>
                 </div>
             </div>
         </section>
@@ -1282,11 +1320,38 @@
         });
 
         // ─── TESTIMONIALS ────────────────────────────────────
+        // Real 5-star reviews from Google. All patients consented to publication.
         const testimonialData = [
-            { quote: "The precision and calm in every appointment made complex treatment feel effortless. My smile looks natural and refined.", name: "Andrea Lim", title: "ENTREPRENEUR" },
-            { quote: "From diagnostics to final restorations, the team explained every decision with clarity. The results exceeded my expectations.", name: "Michael Santos", title: "ARCHITECT" },
-            { quote: "I came in for emergency care and stayed for long-term treatment. The service standards here are truly world-class.", name: "Danica Rivera", title: "CREATIVE DIRECTOR" },
-            { quote: "Tomford Clinic combines technology and empathy in a way that feels rare. Every visit has been smooth and reassuring.", name: "Paolo de Vera", title: "PRIVATE CLIENT" },
+            {
+                quote: "Warm and inviting staff that never fails to attend to your needs. Working with Doc Tom is a breeze — no frills, and he explains everything clearly. Always an amazing experience every visit.",
+                name: "John Cyril Tutanes",
+                title: "GENERAL VISITS"
+            },
+            {
+                quote: "Dr. Tom has very light hands, making the procedure much more comfortable than I expected. He was highly professional and explained everything clearly throughout the treatment. The clinic itself was also very clean and well-maintained. I highly recommend Tomford Dental Clinic to anyone looking for quality dental care.",
+                name: "Lene Santiago",
+                title: "TOOTH EXTRACTION"
+            },
+            {
+                quote: "Very professional, gentle, and took the time to explain the procedure clearly, which really helped ease my nerves. The extraction itself was quick and much less painful than I expected. The clinic is clean, well-organized, and truly gives you confidence in the quality of care you’re receiving.",
+                name: "Homer Angel",
+                title: "MOLAR EXTRACTION"
+            },
+            {
+                quote: "Dr. Tom was calm, professional, and explained the entire procedure clearly, which really helped reduce my anxiety. The treatment was gentle and virtually painless, and I felt comfortable throughout. I’m very happy with the results and would highly recommend Dr. Tom for anyone needing root canal treatment.",
+                name: "Marco Singgh",
+                title: "ROOT CANAL THERAPY"
+            },
+            {
+                quote: "11/10! Huge thanks to Doc Tom for making my wisdom tooth extraction smooth and painless. I thought it would take 2 hours since my case wasn’t easy, but he finished in just 1 hour. Magaan ang kamay, gentle, very considerate — you can feel he is truly skilled. The clinic is super clean and the staff are friendly and welcoming.",
+                name: "Pearl Margaret",
+                title: "WISDOM TOOTH EXTRACTION"
+            },
+            {
+                quote: "The clinic is very clean, well-organized, and comfortable. Doc Tom has very light hands and made me feel comfortable throughout my procedure. He explained everything clearly and was very accommodating with my questions. Overall, a very positive experience and we truly appreciated the warm and welcoming environment.",
+                name: "Maria Agnes",
+                title: "CLEANING & CONSULTATION"
+            },
         ];
 
         const quoteEl   = document.getElementById('testimonialQuote');
