@@ -575,15 +575,29 @@ function getBookedSlotCounts(dateStr) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// getSlots (unchanged logic, uses updated getBookedSlotCounts)
+// getSlots — optimized: one-shot sheet + calendar reads + 30s cache
+//
+// Previous version made 1 sheet read + 1 calendar read PER DAY
+// (60+ API calls for a 30-day window). New version reads each
+// source exactly once, builds in-memory date maps, then loops in
+// pure JS. CacheService memoizes the response for 30 seconds so
+// repeat visitors get an instant reply.
 // ─────────────────────────────────────────────────────────────
 
 function getSlots(e) {
   try {
-    var config   = getConfigObject();
     var fromStr  = (e && e.parameter && e.parameter.from) || getTodayPHT();
     var numDays  = parseInt((e && e.parameter && e.parameter.days) || '14', 10);
 
+    // ── Cache lookup ─────────────────────────────────────────
+    var cache = CacheService.getScriptCache();
+    var cacheKey = 'slots_v1_' + fromStr + '_' + numDays;
+    var cached = cache.get(cacheKey);
+    if (cached) {
+      try { return JSON.parse(cached); } catch (err) { /* corrupt cache — fall through and recompute */ }
+    }
+
+    var config = getConfigObject();
     var openTime     = config.OPEN_TIME             || '09:00';
     var closeTime    = config.CLOSE_TIME            || '19:00';
     var slotDur      = parseInt(config.SLOT_DURATION_MINS    || '30', 10);
@@ -599,6 +613,15 @@ function getSlots(e) {
     var advanceCutoff = new Date(nowPHT.getTime() + advanceDays * 24 * 60 * 60 * 1000);
 
     var fromParts = fromStr.split('-').map(Number);
+
+    // ── ONE-SHOT FETCHES ─────────────────────────────────────
+    // 1) Read all appointments once, group by date.
+    var bookedByDate = buildBookedByDateMap();
+    // 2) Read calendar events for the entire window once, group by date.
+    var rangeStart = new Date(fromParts[0], fromParts[1]-1, fromParts[2], 0, 0, 0);
+    var rangeEnd   = new Date(rangeStart.getTime() + (numDays + 7) * 24 * 60 * 60 * 1000);
+    var busyByDate = buildBusyByDateMap(calendarId, rangeStart, rangeEnd);
+
     var result    = {};
     var collected = 0;
 
@@ -620,12 +643,12 @@ function getSlots(e) {
         return slotDt > cutoff;
       });
 
-      var booked = getBookedSlotCounts(dateStr);
-      var busy   = getCalendarBusy(calendarId, d, slotDur);
+      var booked = bookedByDate[dateStr] || {};
+      var busy   = busyByDate[dateStr] || [];
 
       var available = allSlots.filter(function(t) {
         if ((booked[t] || 0) >= maxPerSlot) return false;
-        var parts    = t.split(':').map(Number);
+        var parts     = t.split(':').map(Number);
         var slotStart = new Date(d.getFullYear(), d.getMonth(), d.getDate(), parts[0], parts[1], 0);
         var slotEnd   = new Date(slotStart.getTime() + slotDur * 60 * 1000);
         for (var i = 0; i < busy.length; i++) {
@@ -638,10 +661,62 @@ function getSlots(e) {
       collected++;
     }
 
-    return { slots: result, slotDuration: slotDur };
+    var response = { slots: result, slotDuration: slotDur };
+
+    // Cache for 30s. Slots are still validated server-side at submit
+    // (validateSlotAvailability reads fresh), so race conditions are
+    // caught — stale cache only causes a recoverable 'pick another' message.
+    try { cache.put(cacheKey, JSON.stringify(response), 30); }
+    catch (err) { Logger.log('cache.put failed: ' + err); }
+
+    return response;
   } catch(err) {
     Logger.log('getSlots error: ' + err);
     return { slots: {}, error: err.toString() };
+  }
+}
+
+// One-shot read of every appointment, keyed by date -> time -> count.
+// Replaces N separate getBookedSlotCounts(dateStr) calls.
+function buildBookedByDateMap() {
+  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Appointments');
+  if (!sheet || sheet.getLastRow() <= 1) return {};
+  var numCols = Math.min(10, sheet.getLastColumn());
+  var rows    = sheet.getRange(2, 1, sheet.getLastRow() - 1, numCols).getValues();
+  var map     = {};
+  rows.forEach(function(row) {
+    var status = numCols >= 9 ? (row[8] || 'Approved').toString().trim() : 'Approved';
+    if (status === 'Rejected') return; // declined slots free up again
+    var d = normalizeSheetDate(row[5]);
+    var t = normalizeSheetTime(row[6]);
+    if (!d || !t) return;
+    if (!map[d]) map[d] = {};
+    map[d][t] = (map[d][t] || 0) + 1;
+  });
+  return map;
+}
+
+// One-shot read of calendar busy windows across the full request window,
+// keyed by YYYY-MM-DD -> array of {start, end}. Replaces N separate
+// getCalendarBusy(calendarId, day) calls.
+function buildBusyByDateMap(calendarId, rangeStart, rangeEnd) {
+  try {
+    var cal = CalendarApp.getCalendarById(calendarId);
+    if (!cal) { Logger.log('Calendar not found: ' + calendarId); return {}; }
+    var events = cal.getEvents(rangeStart, rangeEnd);
+    var map = {};
+    events.forEach(function(ev) {
+      var start = ev.getStartTime();
+      var end   = ev.getEndTime();
+      var key   = formatDateStr(start);
+      if (!map[key]) map[key] = [];
+      map[key].push({ start: start, end: end });
+    });
+    return map;
+  } catch (err) {
+    Logger.log('buildBusyByDateMap error: ' + err);
+    return {};
   }
 }
 
