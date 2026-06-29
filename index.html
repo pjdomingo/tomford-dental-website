@@ -342,6 +342,58 @@
         /* ─── TESTIMONIALS ──────────────────────────────── */
         .testimonial-fade { transition: opacity 0.35s ease; }
 
+        /* Auto-advance progress bar under the carousel */
+        .testimonial-progress {
+            height: 2px; background: rgba(12,26,54,0.08); border-radius: 999px; overflow: hidden;
+        }
+        .testimonial-progress-bar {
+            height: 100%; width: 0%; background: var(--primary, #f46709);
+            transition: width 100ms linear;
+            border-radius: 999px;
+        }
+
+        /* ─── PATIENT GALLERY MARQUEE ──────────────────── */
+        .marquee {
+            position: relative; overflow: hidden;
+            -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 80px, #000 calc(100% - 80px), transparent 100%);
+                    mask-image: linear-gradient(90deg, transparent 0, #000 80px, #000 calc(100% - 80px), transparent 100%);
+        }
+        .marquee-track {
+            display: flex; gap: 1.25rem; width: max-content;
+            animation: marquee-scroll 60s linear infinite;
+        }
+        .marquee:hover .marquee-track,
+        .marquee:focus-within .marquee-track { animation-play-state: paused; }
+        .marquee-card {
+            flex: 0 0 auto;
+            width: 280px; height: 360px;
+            border-radius: 1.25rem; overflow: hidden;
+            box-shadow: 0 8px 24px rgba(12,26,54,0.08);
+            position: relative;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .marquee-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 16px 36px rgba(12,26,54,0.18);
+            z-index: 2;
+        }
+        .marquee-card img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 6s ease;
+        }
+        .marquee-card:hover img { transform: scale(1.08); }
+        @keyframes marquee-scroll {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .marquee-track { animation: none; }
+        }
+        @media (max-width: 640px) {
+            .marquee-card { width: 220px; height: 300px; }
+            .marquee-track { animation-duration: 45s; }
+        }
+
         /* ─── BOOKING MODAL ─────────────────────────────── */
         .booking-modal { position: fixed; inset: 0; z-index: 70; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .booking-modal.open { display: flex; }
@@ -810,7 +862,10 @@
                                 </div>
                             </div>
                         </article>
-                        <div class="mt-8 flex items-center justify-between flex-wrap gap-4">
+                        <div class="mt-6 testimonial-progress" role="presentation" aria-hidden="true">
+                            <div id="testimonialProgressBar" class="testimonial-progress-bar"></div>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between flex-wrap gap-4">
                             <div class="flex gap-3">
                                 <button id="prevTestimonial" aria-label="Previous testimonial" class="rounded-full border border-secondary/25 p-3 text-secondary transition hover:border-primary hover:text-primary">&#8592;</button>
                                 <button id="nextTestimonial" aria-label="Next testimonial" class="rounded-full border border-secondary/25 p-3 text-secondary transition hover:border-primary hover:text-primary">&#8594;</button>
@@ -835,26 +890,25 @@
                     <h2 class="mt-3 font-display text-4xl lg:text-5xl text-secondary leading-tight">Real Patients.<br/>Real Smiles.</h2>
                     <p class="mt-5 text-secondary/70 leading-relaxed">Across cleanings, extractions, root canals, and everything in between — these are some of the people who trust us with their care.</p>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 lg:gap-5">
-                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group">
-                        <img src="assets/patients/patient-01.jpg" alt="TomFord Dental patient with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
-                    </div>
-                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-100">
-                        <img src="assets/patients/patient-02.jpg" alt="TomFord Dental family visit" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
-                    </div>
-                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-200">
-                        <img src="assets/patients/patient-03.jpg" alt="TomFord Dental patients with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
-                    </div>
-                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-100">
-                        <img src="assets/patients/patient-04.jpg" alt="TomFord Dental family with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
-                    </div>
-                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-200">
-                        <img src="assets/patients/patient-05.jpg" alt="TomFord Dental patient with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
-                    </div>
-                    <div class="reveal relative overflow-hidden rounded-2xl shadow-md group delay-300">
-                        <img src="assets/patients/patient-06.jpg" alt="TomFord Dental patient with Doc Tom" loading="lazy" class="h-72 lg:h-80 w-full object-cover transition duration-500 group-hover:scale-105" />
+                <div class="marquee reveal" aria-label="Patient photo gallery">
+                    <div class="marquee-track">
+                        <!-- First pass -->
+                        <div class="marquee-card"><img src="assets/patients/patient-01.jpg" alt="TomFord Dental patient with Doc Tom" loading="lazy" /></div>
+                        <div class="marquee-card"><img src="assets/patients/patient-02.jpg" alt="TomFord Dental family visit" loading="lazy" /></div>
+                        <div class="marquee-card"><img src="assets/patients/patient-03.jpg" alt="TomFord Dental patients with Doc Tom" loading="lazy" /></div>
+                        <div class="marquee-card"><img src="assets/patients/patient-04.jpg" alt="TomFord Dental family with Doc Tom" loading="lazy" /></div>
+                        <div class="marquee-card"><img src="assets/patients/patient-05.jpg" alt="TomFord Dental patient with Doc Tom" loading="lazy" /></div>
+                        <div class="marquee-card"><img src="assets/patients/patient-06.jpg" alt="TomFord Dental patient with Doc Tom" loading="lazy" /></div>
+                        <!-- Duplicate pass for seamless infinite loop -->
+                        <div class="marquee-card" aria-hidden="true"><img src="assets/patients/patient-01.jpg" alt="" loading="lazy" /></div>
+                        <div class="marquee-card" aria-hidden="true"><img src="assets/patients/patient-02.jpg" alt="" loading="lazy" /></div>
+                        <div class="marquee-card" aria-hidden="true"><img src="assets/patients/patient-03.jpg" alt="" loading="lazy" /></div>
+                        <div class="marquee-card" aria-hidden="true"><img src="assets/patients/patient-04.jpg" alt="" loading="lazy" /></div>
+                        <div class="marquee-card" aria-hidden="true"><img src="assets/patients/patient-05.jpg" alt="" loading="lazy" /></div>
+                        <div class="marquee-card" aria-hidden="true"><img src="assets/patients/patient-06.jpg" alt="" loading="lazy" /></div>
                     </div>
                 </div>
+                <p class="mt-6 text-center text-xs tracking-[0.18em] uppercase text-secondary/40">Hover to pause</p>
             </div>
         </section>
 
@@ -1354,11 +1408,19 @@
             },
         ];
 
-        const quoteEl   = document.getElementById('testimonialQuote');
-        const nameEl    = document.getElementById('testimonialName');
-        const titleEl   = document.getElementById('testimonialTitle');
-        const articleEl = document.getElementById('testimonialArticle');
+        const quoteEl       = document.getElementById('testimonialQuote');
+        const nameEl        = document.getElementById('testimonialName');
+        const titleEl       = document.getElementById('testimonialTitle');
+        const articleEl     = document.getElementById('testimonialArticle');
+        const progressBarEl = document.getElementById('testimonialProgressBar');
+        const carouselEl    = document.getElementById('testimonialContent');
+        const AUTO_ADVANCE_MS = 7000;
+        const PROGRESS_TICK_MS = 100;
         let currentIndex = 0;
+        let autoTimer = null;
+        let progressTimer = null;
+        let progressElapsed = 0;
+        let isPaused = false;
 
         function renderTestimonial(idx) {
             if (articleEl) articleEl.style.opacity = '0';
@@ -1370,15 +1432,66 @@
             }, 180);
         }
 
+        function setProgress(pct) {
+            if (progressBarEl) progressBarEl.style.width = pct + '%';
+        }
+
+        function resetProgress() {
+            progressElapsed = 0;
+            setProgress(0);
+        }
+
+        function tickProgress() {
+            if (isPaused) return;
+            progressElapsed += PROGRESS_TICK_MS;
+            const pct = Math.min(100, (progressElapsed / AUTO_ADVANCE_MS) * 100);
+            setProgress(pct);
+            if (progressElapsed >= AUTO_ADVANCE_MS) {
+                progressElapsed = 0;
+                currentIndex = (currentIndex + 1) % testimonialData.length;
+                renderTestimonial(currentIndex);
+                setProgress(0);
+            }
+        }
+
+        function startAuto() {
+            stopAuto();
+            isPaused = false;
+            progressTimer = setInterval(tickProgress, PROGRESS_TICK_MS);
+        }
+
+        function stopAuto() {
+            if (progressTimer) { clearInterval(progressTimer); progressTimer = null; }
+        }
+
         document.getElementById('prevTestimonial').addEventListener('click', () => {
             currentIndex = (currentIndex - 1 + testimonialData.length) % testimonialData.length;
             renderTestimonial(currentIndex);
+            resetProgress();
         });
         document.getElementById('nextTestimonial').addEventListener('click', () => {
             currentIndex = (currentIndex + 1) % testimonialData.length;
             renderTestimonial(currentIndex);
+            resetProgress();
         });
+
+        // Pause auto-rotation on hover/focus, resume on leave/blur
+        if (carouselEl) {
+            carouselEl.addEventListener('mouseenter', () => { isPaused = true; });
+            carouselEl.addEventListener('mouseleave', () => { isPaused = false; });
+            carouselEl.addEventListener('focusin',   () => { isPaused = true; });
+            carouselEl.addEventListener('focusout',  () => { isPaused = false; });
+        }
+
+        // Pause auto-rotation when the tab is hidden (saves work + better UX on return)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) { stopAuto(); } else { startAuto(); }
+        });
+
+        // Respect reduced-motion preference: render but don't auto-advance
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         renderTestimonial(currentIndex);
+        if (!reducedMotion) startAuto();
 
         // ─── BOOKING MODAL ───────────────────────────────────
         const bookingModal     = document.getElementById('bookingModal');
