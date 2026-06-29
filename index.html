@@ -221,27 +221,17 @@
                 border-color 0.25s ease;
             will-change: transform;
         }
-        /* Animated gradient accent bar on the left */
-        .service-card::before {
-            content: '';
-            position: absolute;
-            left: 0; top: 12px; bottom: 12px;
-            width: 3px;
-            background: linear-gradient(180deg, #f46709 0%, #ffb680 100%);
-            border-radius: 0 3px 3px 0;
-            transform: scaleY(0);
-            transform-origin: center;
-            transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
-        }
-        /* Soft warm glow sweep on hover (top-right) */
+        /* Subtle bottom accent — gold hairline drawing from left on hover.
+           Replaces the old left bar which felt generic / template-y. */
         .service-card::after {
             content: '';
             position: absolute;
-            top: -60%; right: -40%;
-            width: 180px; height: 180px;
-            background: radial-gradient(circle, rgba(244,103,9,0.16) 0%, rgba(244,103,9,0) 70%);
-            opacity: 0;
-            transition: opacity 0.35s ease;
+            left: 22px; right: 22px; bottom: 0;
+            height: 1px;
+            background: linear-gradient(90deg, #c9a96e 0%, rgba(201,169,110,0.0) 100%);
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 0.55s cubic-bezier(0.22,1,0.36,1);
             pointer-events: none;
         }
         .service-card.svc-in {
@@ -249,32 +239,34 @@
             transform: translateY(0);
         }
         .service-card.svc-in:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 18px 42px -14px rgba(22,43,87,0.18), 0 4px 12px rgba(22,43,87,0.05);
-            border-color: rgba(244,103,9,0.25);
+            transform: translateY(-3px);
+            box-shadow:
+                0 26px 50px -22px rgba(22,43,87,0.18),
+                0 6px 16px -6px rgba(22,43,87,0.08);
+            border-color: rgba(22,43,87,0.10);
+            background: linear-gradient(180deg, #ffffff 0%, #f6f1e8 100%);
         }
-        .service-card.svc-in:hover::before { transform: scaleY(1); }
-        .service-card.svc-in:hover::after  { opacity: 1; }
+        .service-card.svc-in:hover::after { transform: scaleX(1); }
 
-        /* Icon badge — circular, gradient, lifts on hover */
+        /* Icon badge — circular, gradient, subtle lift on hover (no rotate) */
         .svc-icon {
             width: 42px; height: 42px;
-            background: linear-gradient(135deg, #fff3e8 0%, #ffe0c7 100%);
+            background: linear-gradient(135deg, #fdf6ec 0%, #f4e6d0 100%);
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             margin-bottom: 14px;
             flex-shrink: 0;
-            box-shadow: inset 0 0 0 1px rgba(244,103,9,0.14), 0 4px 10px rgba(244,103,9,0.08);
+            box-shadow: inset 0 0 0 1px rgba(201,169,110,0.20), 0 3px 8px rgba(22,43,87,0.05);
             transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease;
         }
         .service-card:hover .svc-icon {
-            transform: scale(1.08) rotate(-4deg);
-            box-shadow: inset 0 0 0 1px rgba(244,103,9,0.28), 0 8px 18px rgba(244,103,9,0.18);
+            transform: translateY(-2px);
+            box-shadow: inset 0 0 0 1px rgba(201,169,110,0.40), 0 6px 14px rgba(201,169,110,0.18);
         }
         .svc-icon svg { transition: transform 0.35s ease; }
-        .service-card:hover .svc-icon svg { transform: scale(1.1); }
+        .service-card:hover .svc-icon svg { transform: scale(1.06); }
 
-        /* Title — Playfair Display, elegant */
+        /* Title — Playfair Display, stays navy (no color shift on hover) */
         .svc-title {
             color: #162b57;
             font-family: "Playfair Display", serif;
@@ -283,9 +275,9 @@
             line-height: 1.3;
             margin-bottom: 6px;
             letter-spacing: -0.005em;
-            transition: color 0.25s ease;
+            transition: letter-spacing 0.35s ease;
         }
-        .service-card:hover .svc-title { color: #f46709; }
+        .service-card:hover .svc-title { letter-spacing: 0.005em; }
 
         /* Description — DM Sans, quiet */
         .svc-desc {
@@ -348,56 +340,62 @@
             display: inline-flex; align-items: center; gap: 6px;
             padding: 7px 14px;
             border-radius: 999px;
-            border: 1.5px solid rgba(12,26,54,0.15);
-            background: #ffffff;
-            color: rgba(12,26,54,0.75);
+            border: 1px solid rgba(22,43,87,0.12);
+            background: #fbfaf7;
+            color: rgba(22,43,87,0.72);
             font-size: 0.78rem; font-weight: 500;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
             user-select: none;
             font-family: inherit;
         }
         .service-chip:hover {
-            border-color: rgba(244,103,9,0.5);
-            color: #f46709;
-            background: rgba(244,103,9,0.04);
+            background: #f6f1e8;
+            border-color: rgba(201,169,110,0.45);
+            color: #162b57;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(22,43,87,0.06);
         }
         .service-chip.selected {
-            background: #f46709;
-            border-color: #f46709;
-            color: #fff;
+            background: #162b57;
+            border-color: #162b57;
+            color: #fbfaf7;
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(244,103,9,0.25);
+            box-shadow: 0 6px 16px rgba(22,43,87,0.20);
         }
         .service-chip.selected:hover {
-            background: #e05800;
-            border-color: #e05800;
-            color: #fff;
+            background: #0e1e3f;
+            border-color: #0e1e3f;
+            color: #fbfaf7;
+            transform: translateY(-1px);
         }
         .service-chip:disabled,
         .service-chip[aria-disabled="true"] {
             opacity: 0.4; cursor: not-allowed;
-            background: rgba(12,26,54,0.03);
+            background: rgba(22,43,87,0.03);
         }
         .service-chip:disabled:hover,
         .service-chip[aria-disabled="true"]:hover {
-            border-color: rgba(12,26,54,0.15);
-            color: rgba(12,26,54,0.75);
-            background: rgba(12,26,54,0.03);
+            border-color: rgba(22,43,87,0.12);
+            color: rgba(22,43,87,0.72);
+            background: rgba(22,43,87,0.03);
+            transform: none;
+            box-shadow: none;
         }
         .service-chip-check {
             width: 14px; height: 14px;
             display: none; flex-shrink: 0;
+            color: #c9a96e;
         }
         .service-chip.selected .service-chip-check { display: inline-block; }
         .service-helper {
             margin-top: 10px;
             font-size: 0.72rem;
-            color: rgba(12,26,54,0.55);
+            color: rgba(22,43,87,0.55);
             display: flex; align-items: center; justify-content: space-between; gap: 8px;
             flex-wrap: wrap;
         }
-        .service-counter { font-weight: 600; color: #f46709; }
+        .service-counter { font-weight: 600; color: #c9a96e; }
 
         /* ─── TESTIMONIALS ──────────────────────────────── */
         .testimonial-fade { transition: opacity 0.35s ease; }
@@ -552,7 +550,11 @@
             color:#162b57; font-size:1rem;
             transition:all 0.2s ease;
         }
-        .slot-nav-btn:hover:not(:disabled) { border-color:#f46709; color:#f46709; }
+        .slot-nav-btn:hover:not(:disabled) {
+            border-color: rgba(201,169,110,0.5);
+            color: #162b57;
+            background: #f6f1e8;
+        }
         .slot-nav-btn:disabled { opacity:0.3; cursor:not-allowed; }
         .slot-week-label {
             font-size:0.78rem; color:rgba(22,43,87,0.5);
@@ -582,21 +584,39 @@
         }
         .slot-day-date { font-size:0.72rem; color:rgba(22,43,87,0.45); display:block; }
         .slot-btn {
+            position: relative;
             width:100%; padding:9px 4px;
-            border:1.5px solid rgba(22,43,87,0.14);
-            border-radius:8px; background:#fff;
+            border:1px solid rgba(22,43,87,0.10);
+            border-radius:8px; background:#fbfaf7;
             font-size:0.78rem; font-weight:500; color:#162b57;
             cursor:pointer; text-align:center;
-            transition:all 0.18s ease;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
             font-family:'DM Sans',sans-serif;
             white-space:nowrap;
         }
-        .slot-btn:hover { border-color:#f46709; color:#f46709; background:#fff8f0; }
-        .slot-btn.selected {
-            background:#f46709; border-color:#f46709;
-            color:#fff; font-weight:700;
-            box-shadow:0 4px 14px rgba(244,103,9,0.3);
+        /* Hover: gentle warmth + tiny gold hairline at the bottom (no orange swap) */
+        .slot-btn::after {
+            content: '';
+            position: absolute;
+            left: 28%; right: 28%; bottom: 4px;
+            height: 1px;
+            background: #c9a96e;
+            opacity: 0;
+            transition: opacity 0.18s ease;
         }
+        .slot-btn:hover {
+            background: #ffffff;
+            border-color: rgba(22,43,87,0.18);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(22,43,87,0.06);
+        }
+        .slot-btn:hover::after { opacity: 1; }
+        .slot-btn.selected {
+            background:#162b57; border-color:#162b57;
+            color:#fbfaf7; font-weight:600;
+            box-shadow:0 8px 20px rgba(22,43,87,0.22);
+        }
+        .slot-btn.selected::after { display: none; }
         .slot-empty {
             font-size:0.72rem; color:rgba(22,43,87,0.35);
             text-align:center; padding:10px 4px; font-style:italic;
@@ -612,13 +632,27 @@
             100% { background-position:-200% 0; }
         }
         .slot-selected-display {
-            margin-top:12px; padding:10px 14px;
-            background:#fff8f0; border-radius:8px;
-            border-left:3px solid #f46709;
-            font-size:0.82rem; color:#f46709; font-weight:600;
-            display:none;
+            margin-top: 14px; padding: 12px 16px;
+            background: #fbfaf7;
+            border: 1px solid rgba(201,169,110,0.30);
+            border-radius: 10px;
+            font-size: 0.82rem; color: #162b57; font-weight: 500;
+            display: none;
+            position: relative;
+            letter-spacing: 0.01em;
         }
-        .slot-selected-display.visible { display:block; }
+        /* Gold dot indicator instead of a left bar — small, premium */
+        .slot-selected-display::before {
+            content: '';
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #c9a96e;
+            margin-right: 10px;
+            vertical-align: middle;
+            box-shadow: 0 0 0 3px rgba(201,169,110,0.18);
+        }
+        .slot-selected-display.visible { display: block; }
     </style>
 </head>
 
